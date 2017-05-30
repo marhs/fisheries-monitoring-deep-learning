@@ -1,0 +1,56 @@
+% Chapter Template
+
+\chapter{Soluciones presentadas} % Main chapter title
+
+\label{ChapterX} % Change X to a consecutive number; for referencing this chapter elsewhere, use \ref{ChapterX}
+
+\section{Idea}
+Cuando un humano afronta el problema de clasificar las imágenes se puede
+observar que se sigue una estrategia clara: primero buscamos si
+existe un pez en la foto y luego intentams clasificarlo en una de las categorías
+disponibles. 
+
+El acto de encontrar un pez en la foto puede variar de una persona a otra,
+pero se podría generalizar diciendo que es necesario encontrar una serie de
+características que puedan ser identificadas con alguna de las categorías con
+las que se trabaja.
+
+La idea de la solución parte de esta base. A la hora de clasificar una
+imagen primero es necesario encontrar el contenido relevante para, luego, 
+usarlo en la clasificación. En el presente problema esto se puede traducir a que
+primero debemos encontrar los peces, si existe alguno en la imagen, antes de
+decidir a qué categoría pertenecen.
+
+figura: diagrama de decision sobre el proceso mental:
+encontrar caracteristicas?: no: NoF, si: encaja con pez?: no: other, si: pez
+
+Esta idea nos deja una estructura clara en mente. Una parte del modelo debe
+encontrar las características necesarias para clasificar y otra debe clasificar
+en base a estas características. Las arquitecturas encontradas en problemas
+similares (citas al paper de vgg y el de resnet), permitirían separar con 
+claridad estas dos etapas, pudiendo experimentar con diferentes modelos en ambos
+casos.
+
+\section{Arquitectura}
+% TODO no hay indentacion en este parrafo
+La estructura de la solución general sigue el esquema de la figura X. Lo que se
+detalla aquí es la arquiectura general de las soluciones, sobre la cual se ha
+ido iterando probando diferentes elementos y valores.
+
+Consta de dos partes, un modelo general preentrenado y un modelo
+consecutivo al primero entrenado de cero para este el problema. La idea
+de esta arquitectura es aprovechar la potencia de un entrenamiento genérico de
+reconocimiento de imágenes y adaptarlo a nuestro problema mediante una capa
+separada e intercambiable.
+
+Las ventajas que ofrece esta arquitectura son claras: es posible separar el
+problema en un problema de reconocimiento de imágenes y otro problema de
+clasificación.
+
+\subsection{Modelo preentrenado}
+
+Aqui detallo las implementaciones de los modelos basados en Imagenet (los
+disponibles en keras.io): VGG, ResNet e Inception. Tambien tengo que decir
+porque prefiero VGG a otros modelos, sobre todo a nivel didactico.
+
+\subsection{Fine tuning}
