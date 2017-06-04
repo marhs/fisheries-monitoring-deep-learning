@@ -2,11 +2,15 @@
 
 \label{BasicConcepts}
 
+\section{Redes neuronales}
+% TODO
+Introducción a las redes neuronales, back-propagation, capas, input-outpus, etc
+
+
 \section{Convoluciones}
 
 Una imagen en el ámbito digital se entiende como una matriz de puntos.
-Cada uno de estos puntos puede ser interpretado como un número, que representa la localización de este punto en la escala de grises. En este modelo cada elemento será un número entre 0 y 1, 0 representando el extremo oscuro de la escala y 1 el extremo claro.
-Para imágenes en color, si se usa el modelo RGB (Red, Green, Blue), cada uno de estos puntos de la matriz es representado por tres números, correspondientes a la escala en cada uno de los colores primarios de RGB.
+Cada uno de estos puntos puede ser interpretado como un número, que representa la localización de este punto en la escala de grises. Para representar la posición del punto en la escala de grises usaremos los valores menores para los puntos más oscuros y los mayores para los más claros.
 
 Por lo tanto, una imagen como la siguiente:
 \begin{center}
@@ -26,7 +30,7 @@ Para simplificar, la mayoría de los ejemplos van a usar una escala de grises, p
 
 Al trabajar con esta interpretación de lo que es una imagen, se pueden usar operaciones sobre la matriz de la imagen para transformarla de diferentes maneras.
 
-Imaginemos una matriz de 3x3:
+Imaginemos una matriz filtro de 3$\times$3 (también llamada matriz de convolución):
 
 \[
   F=
@@ -37,7 +41,7 @@ Imaginemos una matriz de 3x3:
   \end{array} } \right]
 \]
 
-Se puede usar la matriz como un filtro para la imagen I de la siguiente manera: Primero, superponemos la matriz en algún punto de la imagen I. Esto modificará el pixel donde ha quedado colocado el valor central de la matriz F.  Multiplicamos cada uno de los valores superpuestos, sumamos los resultados y los sustituimos en el valor central. Si hacemos esto para cada píxel de la imagen original (superponer el filtro en ese píxel y sustituir el valor por la operación), la imagen cambiará.
+Se puede usar la matriz como un filtro para una imagende la siguiente manera: Primero, superponemos la matriz en algún punto de la imagen. Esto modificará el pixel donde ha quedado colocado el valor central de la matriz F. Multiplicamos cada uno de los valores superpuestos, sumamos los resultados y los sustituimos en el valor central. Esto se hace para cada píxel de la imagen original (superponer el filtro en ese píxel y sustituir el valor por la operación).
 
 En el caso de la matriz F, la fila superior son todos valores negativos, la intermedia son todos 1 y la inferior todos ceros. Si aplicamos la operación descrita con la matriz F sobre una imagen, los píxeles más brillantes (aquellos con mayor valor) serán los que su fila superior es cero, eliminando los valores negativos y la fila intermedia es 1. Esto ocurrirá con más frecuencia en los bordes superiores de objetos claros con fondo oscuro.
 
@@ -54,6 +58,24 @@ Si aplicamos el filtro a la imagen podemos observar como resalta en blanco los b
 
 Lo interesante de este método es que hemos conseguido resaltar características del objeto representado en la imagen solo multiplicando matrices.
 
+Las matrices de convolución pueden ser de mayor tamaño, permitiendo capturar características más complejas. La matrix de 3$\times$3 es la menor matriz que permite definir en su totalidad el concepto de espacio, pudiendo extraer características espaciales en dos dimensiones.
+
+A la hora de trabajar con imágenes en color es necesario usar un modelo de color. Uno de los más usados, RGB, se compone de tres capas, una dedicada a la intensidad roja, otra a la verde y la última a la azul, de ahí su nombre. Cada filtro se aplicaría a cada capa por separado, permitiendo de esta manera detectar diferentes características de la imagen que ocurran solo en uno de los colores.
+
 Para ver como afectan diferentes filtros a una imagen, existe una página (http://setosa.io/ev/image-kernels/ mover a biblio) donde se pueden probar ejemplos con filtros personalizados, haciendo el concepto mucho más sencillo de comprender.
+
+\section{Redes neuronales convolucionales}
+
+Hemos explorado la idea de que determinados filtros son capaces de extraer información localizada sobre características de la imagen. En el ejemplo del apartado anterior, dada una imagen podíamos saber si había bordes superiores y dónde se podían encontrar. Esto puede ser de gran utilidad en el campo de reconocimiento de imágenes, ya que podemos usar esa información localizada para categorizar o aplicar otro tipo de técnicas en esas áreas señaladas.
+
+El problema está en cómo encontrar los mejores filtros para sacar las características más relevantes de una imagen.
+
+Analizando como funcionan los filtros convolucionales vemos su parecido con las redes neuronales. Al igual que las redes neuronales, los filtros son matrices que estamos aplicando a los datos de entrada que producirán unos datos de salida relevantes con la función buscada. El entrenamiento de una red neuronal va modificando los pesos de las diferentes capas hasta que produce una salida relevante con los ejemplos del conjunto de entrenamiento.
+
+Si entendemos los pesos como la matriz convolucional, podemos hacer que sea la misma red la que busque el mejor filtro para nuestro problema de clasificación. De hecho, ya que las redes neuronales son capaces de componer diferentes funciones en capas de la red para imitar funciones no lineales, podemos aplicar la misma idea a las redes con filtros: componer diferentes filtros para poder extraer características más complejas.
+
+Puede que sea difícil encontrar un filtro 3$\times$3 que sea capaz de detectar esquinas, pero es mucho más sencillo combinando filtros de detección de bordes horizontales y verticales. Lo bueno de usar un modelo para entrenar estos filtros es que dejamos a la red neuronal el decidir cual es la mejor combinación de filtros para la función usada.
+
+Una caracteristica muy interesante de este sistema es su invarianza posicional. Ya que estos filtros actúan localmente en la imagen, pueden identificar, por ejemplo, una esquina en cualquier punto de la imagen. Si queremos detectar formas más complejas, como una mano, no importará si la mano aparece en la esquina izquierda o en la derecha de la imagen.
 
 
