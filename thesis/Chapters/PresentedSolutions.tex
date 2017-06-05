@@ -22,14 +22,12 @@ caracteristicas y clasificación.
 
 \section{Arquitectura}
 
-La arquitectura general usada, que luego sufrirá pequeños cambios, es la descrita en la figura \ref{general-architecture} (Krizhevsky et al.)
+La arquitectura general usada, que luego sufrirá pequeños cambios, es la descrita en la figura~\ref{general-architecture} (Krizhevsky et al.)
 
 \begin{figure}
   \caption{Arquitectura de la red en dos partes}
-  \label{general-architecture}
-  \makebox[\textwidth]{
-    \includegraphics[width=\linewidth]{imagenet-arch}
-  }
+\label{general-architecture}
+  \makebox[\textwidth]{\includegraphics[width=\linewidth]{imagenet-arch}}
 \end{figure}
 
 Esta arquitectura usa en su primera parte una red convolucional preentrenada sobre un conjunto de imágenes mucho más generalista, en este caso Imagenet. Al usar una red convolucional preentrenada sobre fotografías tendrá muchas más capacidad para distinguir características de diferentes objetos, además que existen varias categorías de peces en Imagenet, por lo que sabrá diferenciar este tipo de fotografías.
@@ -37,7 +35,11 @@ Esta arquitectura usa en su primera parte una red convolucional preentrenada sob
 
 \subsection{Red convolucional}
 
-La red convolucional recibir una imagen y devuelve conjunto de i 
+Como explicamos en (cap redes convolucionales), cuando un modelo convolucional recibe una imagen va a devolver $N$ matrices bidimensionales representando el resultado de las aplicación de los $N$ conjuntos de filtros a la imagen inicial. Al ser $N$ matrices bidimensionales también puede considerarse una matriz tridimensional.
+
+Intuitivamente, y haciendo una simplificación, podemos pensar que cada uno de estos filtros representa un mapa de calor de la aparición en la imagen de diferentes características. Por ejemplo, ¿cúanto se parece cada parte de esta imagen a la piel de un pez?.
+
+Hay que tener en cuenta que este modelo convolucional no ha sido entrenado con el conjunto de entrenamiento, si no con el conjunto de entrenamiento de Imagenet. Para lo único que vamos a usar esta red convolucional es para transformar estas imágenes a 
 
 \subsection{Modelo preentrenado}
 
@@ -46,3 +48,4 @@ disponibles en keras.io): VGG, ResNet e Inception. Tambien tengo que decir
 porque prefiero VGG a otros modelos, sobre todo a nivel didactico.
 
 \subsection{Fine tuning}
+
