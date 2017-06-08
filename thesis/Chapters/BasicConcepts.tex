@@ -65,6 +65,7 @@ A la hora de trabajar con imágenes en color es necesario usar un modelo de colo
 Para ver como afectan diferentes filtros a una imagen, existe una página (http://setosa.io/ev/image-kernels/ mover a biblio) donde se pueden probar ejemplos con filtros personalizados, haciendo el concepto mucho más sencillo de comprender.
 
 \section{Redes neuronales convolucionales}
+\label{sec:conv-net}
 
 Hemos explorado la idea de que determinados filtros son capaces de extraer información localizada sobre características de la imagen. En el ejemplo del apartado anterior, dada una imagen podíamos saber si había bordes superiores y dónde se podían encontrar. Esto puede ser de gran utilidad en el campo de reconocimiento de imágenes, ya que podemos usar esa información localizada para categorizar o aplicar otro tipo de técnicas en esas áreas señaladas.
 
@@ -86,11 +87,11 @@ La manera de representar esto es entendiendo los pesos de cada capa como una mat
 
 El concepto de capa en una red convolucional incluye una agrupación de diferentes capas que efectúan diferentes operaciones. Como en las redes neuronales clásicas, la capa precisará de un tratamiento de las entradas con los pesos (en este caso los filtros convolucionales), y una función de activación aumentar la relevancia de las activaciones. 
 
-\subsubsection{Capa convolucional - CONV}
+\subsubsection{Capa convolucional - CONV \textit{(Convolutional layer)}}
 
 Las capas convolucionales son las que hemos visto hasta ahora. Tendrán como pesos $n$ filtros convolucionales (todos del mismo tamaño), y producirán las $n$ salidas de aplicar la imagen de entrada a estos filtros. Una imagen de tamaño $32\times 32$ aplicada sobre una capa convolucional de 8 filtros producirá una salida de tamaño $32 \times 32 \times 8$, o lo que es lo mismo, 8 imágenes de $32 \times 32$
 
-\subsubsection{Capa de activación - RELU}
+\subsubsection{Capa de activación - RELU \textit{(Rectifier Linear layer)}}
 
 Al igual que en las redes clásicas es necesario tratar la salida de la aplicación de los pesos sobre las entradas con una función de activación. 
 
@@ -103,7 +104,7 @@ La manera estándar de modelar la salida de una neurona en las RNAs es a través
   \includegraphics[width=.6\textwidth]{relu-vs-tanh}
 \end{figure}
 
-\subsubsection{Capa de muestreo - POOL}
+\subsubsection{Capa de muestreo - POOL \textit{(Pooling layer)}}
 
 Al usar convoluciones en la imagen sobre el entorno de cada punto la información relevante de este queda difuminada y redundante. Gracias a esto se puede reducir el tamaño del problema mediante muestreo.
 Las capas de muestreo (\textit{pooling layers}) resumen las salidas del entorno de cada grupo de neuronas. Un ejemplo de función de muestreo sería elegir el valor máximo de cada cuadrado de 4 píxeles (figura \ref{maxpool})
@@ -117,8 +118,22 @@ Si la salida de una capa CONV + RELU es $32 \times 32 \times 8$, al aplicar la c
   \includegraphics[width=.6\textwidth]{maxpool}
 \end{figure}
 
-\subsubsection{Capa densa - FC}
+\subsubsection{Capa densa - FC \textit{(Fully connected layer)}}
 
 Esta capa es una capa clásica de red neuronal. Su función es calcular las probabilidades de clasificación dadas las imágenes tratadas. Cada neurona de esta capa estará conectada a cada una de las activaciones de la capa anterior, produciendo una salida por cada clase a clasificar.
 
 Esta capa suele usarse al final de la arquitectura, cuando se han producido varios ciclos de capas convolucionales (CONV + RELU + POOL). Sin embargo, también es común ver arquitecturas con varias capas FC conectadas al final, ampliando la flexibilidad de clasificación de la red en base a características extraidas.
+
+\subsection{Arquitectura}
+\label{sec:conv-net-arch}
+
+\begin{figure}
+    \centering
+    \caption{Ejemplo de arquitectura de una red convolucional para clasificación, \parencite{clarifai}}
+\label{conv-arch}
+  \includegraphics{conv-arch}
+\end{figure}
+
+Un esquema simplificado de un ejemplo de uso de las capas mencionadas se puede encontrar en la figura \ref{conv-arch}. La idea es, mediante capas CONV + RELU + POOL, transformar la imagen en una multitud de representaciones de conceptos cada vez más abstractos. Una vez se alcancen dichos conceptos, usar capas FC para modelar la salida de la red.
+
+Como se verá en la solución presentada para este proyecto, en el capítulo \ref{cap:soluciones}, usar esta arquitectura permite apoyarse en determinadas estrategias para mejorar la eficacia del modelo predictivo.
