@@ -480,6 +480,70 @@ Esto pertime tomar ciertas decisiones sobre el entrenamiento del modelo. Por eje
 
 \section{Modelo con entrada múltiple}
 
-Una examinación del conjunto de datos de entrada nos permite averiguar determinadas propiedades
-\subsection{Multi output (bounding boxes)}
+Una examinación del conjunto de datos de entrada nos permite averiguar determinadas propiedades de las imágenes que se podrían usar para una mejora de los modelos. Por ejemplo, las imágenes están sacadas de diferentes barcos, con diferentes modelos de cámaras. No todas las cámaras generan imágenes del mismo tamaño, por lo que se puede averiguar el barco del que se ha tomado la fotografía por el tamaño de la imagen. 
+
+Ya que diferentes barcos suelen pescar diferentes tipos de peces con mayor o menor probabilidad, el conseguir el tipo de barco puede ser aprovechado por el modelo para balancear las posibilidades de una clase dependiendo del tipo de pesca que suela llevar.
+
+Obviamente la idea no es hacer todo esto a mano, si no entrenar un modelo que tenga en cuenta tanto las imágenes como otra información válida. En este caso se va a elegir el modelo denso, con la diferencia que la última capa tendrá dos entradas: la salida de las capas ocultas de la red neuronal y el tamaño de la imagen, codificado en \textit{onehot}.
+
+TODO Hacer un esquema de las arquitectura de la red.
+
+\begin{python}
+def build_dense_layers(p):
+    # Usamos las entradas de la red convolucional, como antes
+    inp = Input(conv_layers[-1].output_shape[1:])
+    x = MaxPooling2D()(inp)
+    x = BatchNormalization(axis=1)
+    x = Flatten()
+    x = Dropout(p/4)
+    x = Dense(512, activation='relu')
+    x = BatchNormalization()
+    x = Dropout(p)
+    x = Dense(512, activation='relu')
+    x = BatchNormalization()
+    x = Dropout(p/2)
+
+    # Aqui usamos las entradas de los tamaños de las imágenes
+    size_inputs = Input(len(sizes))
+    bn_inputs = BatchNormalization()(size_inputs)
+
+    # Mergeamos ambas entradas en una última capa
+    x = merge([x, bn_inp], 'concat']
+    x = Dense(8, activation='softmax')
+    return x
+
+dense_model = keras.models.Model(
+    [inp, size_inputs],  # El modelo ahora tiene multi entrada
+    build_class_layers(0.45)
+)
+\end{python}
+
+Tras construir el modelo con las entradas múltiples y entrenarlo sobre los dos conjuntos de entrenamiento (las imágenes y los tamaños de las imágenes) vemos la evaluación del modelo.
+\begin{python}
+dense_model.evaluate(test_feat, test_labels)
+>>> [0.1725, 0.9413]
+\end{python}
+
+El modelo ha sacado una evaluación peor que modelos anteriores, incluso usando un modelo que ya se conocía con una evaluación superior.
+
+Aunque la idea es buena, lo que está haciendo por debajo es clasificar los diferentes barcos en base a los tamaños de sus imágenes. Debido a la amplia diferencia de las imágenes de los diferentes tipos de barcos, ya sea por los colores, iluminación, objetos, etc, el modelo denso probablemente ya esté teniendo en cuenta de qué barco es cada imagen. Por lo tanto lo único que va a añadir el introducir estos datos es complejidad del modelo, haciendo más difícil converger a un modelo bueno.
+
+\subsubsection{Fuga de datos}
+
+Esta idea de usar datos diferentes del dataset para clasificar es algo muy usado en los torneos de modelos predictivos. No solo funciona el tamaño de la foto, sino a veces las fotos tienen datos adicionales, como información GPS, hora de creación o modelo de cámara.
+
+No todos estos datos son publicados de una manera voluntaria por comunidades de campeonatos, pero son útiles para conseguir una pequeña mejora en el modelo, siempre que el modelo puede aprovecharse de estos datos.
+
+\section{Salida múltiple}
+
+Se ha explorado la idea de usar un modelo que tenga diferentes fuentes de entrada. También se puede intentar un modelo con diferentes salidas. Una idea no solo es averiguar qué tipo de pez es sino también donde se encuentra en la foto.
+
+Esta estructura hará que el modelo tenga que predecir dos cosas al mismo tiempo, lo cual hace que sea más difícil una convergencia de este. Por otro lado si consige una buena puntuación tiene menos probabilidades de fallar. Si se mira el ejemplo de los pantalones amarillos de la red completamente convolucional, debería encontrar el pez en la foto y a la vez clasificar la foto. En la foto era capaz de predecir que el pez era un atún de cola amarilla por las razones incorrectas, pero en este caso no será capaz ya que tendrá la localización incorrecta del pez.
+
+Para entrenar las localizaciones de los peces en las imágenes se ha usado el dataset que uno de los usarios de kaggle ha hecho público: un conjunto con las coordenadas rectángulos que contienen un pez en la imagen ).
+\begin{figure}
+  \caption{Ejemplo del dataset de localizaciones de peces}
+\label{box}
+  \makebox[\textwidth]{\includegraphics[width=0.5\linewidth]{box}}
+\end{figure}
 
