@@ -74,41 +74,43 @@ Las matrices de convolución pueden ser de mayor tamaño, permitiendo capturar c
 
 A la hora de trabajar con imágenes en color es necesario usar un modelo de color. Uno de los más usados, RGB, se compone de tres capas, una dedicada a la intensidad roja, otra a la verde y la última a la azul, de ahí su nombre. Cada filtro se aplicaría a cada capa por separado, permitiendo de esta manera detectar diferentes características de la imagen que ocurran solo en uno de los colores.
 
-Para analizar cómo afectan diferentes filtros a una imagen, existe una página \parencite{visualizer_convolution} donde se pueden probar ejemplos con filtros personalizados, haciendo el concepto mucho más sencillo de comprender.
+Para analizar cómo afectan diferentes filtros a una imagen, en la página \parencite{visualizer_convolution} se pueden probar ejemplos con filtros personalizados, haciendo el concepto mucho más sencillo de comprender.
 
 \section{Redes neuronales convolucionales}
 \label{sec:conv-net}
 
 Hemos explorado la idea de que determinados filtros son capaces de extraer información localizada sobre características de la imagen. En el ejemplo del apartado anterior, dada una imagen podíamos saber si había bordes superiores y dónde se podían encontrar. Esto puede ser de gran utilidad en el campo de reconocimiento de imágenes, ya que podemos usar esa información localizada para categorizar o aplicar otro tipo de técnicas en esas áreas señaladas.
 
-El problema está en cómo encontrar los mejores filtros para sacar las características más relevantes de una imagen.
+El problema radica en encontrar los mejores filtros para que extaigan las características más relevantes de una imagen.
 
-Analizando como funcionan los filtros convolucionales vemos su parecido con las redes neuronales. Al igual que las redes neuronales, los filtros son matrices que estamos aplicando a los datos de entrada que producirán unos datos de salida relevantes con la función buscada. El entrenamiento de una red neuronal va modificando los pesos de las diferentes capas hasta que produce una salida relevante con los ejemplos del conjunto de entrenamiento.
+Analizando cómo funcionan los filtros convolucionales vemos su parecido con las redes neuronales. Al igual que estas, los filtros se pueden entender como funciones que al aplicarse a los datos de entrada produces unos datos de salida que serán más o menos relevantes para el objetivo buscado. El entrenamiento de una red neuronal va modificando los pesos de las diferentes capas hasta que produce una salida relevante para cada ejemplo del conjunto de entrenamiento. Si entendemos los pesos como matrices convolucionales, podemos hacer que sea la propia red la que busque el mejor filtro para nuestro problema de clasificación. De hecho, ya que las redes neuronales son capaces de componer diferentes funciones en diferentes capas de la red para aprender funciones no lineales, podemos aplicar la misma idea a las redes con filtros: componer diferentes filtros para poder extraer características más complejas.
 
-Si entendemos los pesos como la matriz convolucional, podemos hacer que sea la misma red la que busque el mejor filtro para nuestro problema de clasificación. De hecho, ya que las redes neuronales son capaces de componer diferentes funciones en diferentes capas de la red para imitar funciones no lineales, podemos aplicar la misma idea a las redes con filtros: componer diferentes filtros para poder extraer características más complejas.
+En esta idea se basan las redes convolucionales que trabajan con imágenes. Cada capa de la red constaŕa de varios filtros que se aplicarán a las imágenes que reciba, proporcionando los resultados a la siguiente capa. Ya que lo que importa es la composición de filtros, cada capa deberá entrenar varios filtros al mismo tiempo, permitiendo así aumentar la combinatoria final.
 
-En esta idea se basan las redes convolucionales que trabajan con imágenes. Cada capa de la red va a aplicar varios filtros a la imagen y a devolver las imágenes tratadas por dicho filtro para pasarlo a la siguiente capa. Ya que lo que importa es la composición de filtros, cada capa deberá entrenar varios filtros al mismo tiempo, permitiendo así aumentar la combinatoria final.
+De esta manera, los pesos de cada capa vendrían dados en una matriz tridimensional, que se pueden entender como $d$ (profundidad) filtros de dimensión  $w \times h$ (anchura y altura).
 
-\begin{center}
-  \makebox[\textwidth]{\includegraphics[width=\linewidth]{cnn}}
-\end{center}
+\begin{figure}
+    \centering
+    \caption{\textit{TODO cambiar esta imagen por otra mas aclarativa}}
+  \label{cnn_basic}
+  \includegraphics[width=\textwidth]{cnn}
+\end{figure}
 
-La manera de representar esto es entendiendo los pesos de cada capa como una matriz de tres dimensiones. Estas tres dimensiones se pueden entender como $d$ (profundidad) filtros de dimensión  $w \times h$ (anchura y altura). Cada capa tendrá su conjunto de filtros.
 
 \subsection{Estructura de una capa convolucional}
 
-El concepto de capa en una red convolucional incluye una agrupación de diferentes capas que efectúan diferentes operaciones. Como en las redes neuronales clásicas, la capa precisará de un tratamiento de las entradas con los pesos (en este caso los filtros convolucionales), y una función de activación aumentar la relevancia de las activaciones. 
+El concepto de capa en una red convolucional incluye una agrupación de diferentes capas que efectúan diferentes operaciones. Como en las redes neuronales clásicas, la capa precisará de un tratamiento de las entradas con los pesos (en este caso los filtros convolucionales) y una función de activación.
 
 \subsubsection{Capa convolucional - CONV \textit{(Convolutional layer)}}
 
-Las capas convolucionales son las que hemos visto hasta ahora. Tendrán como pesos $n$ filtros convolucionales (todos del mismo tamaño), y producirán las $n$ salidas de aplicar la imagen de entrada a estos filtros. Una imagen de tamaño $32\times 32$ aplicada sobre una capa convolucional de 8 filtros producirá una salida de tamaño $32 \times 32 \times 8$, o lo que es lo mismo, 8 imágenes de $32 \times 32$
+Las capas convolucionales son las que hemos visto hasta ahora. Tendrán como pesos $n$ filtros convolucionales (todos del mismo tamaño) y producirán las $n$ imágenes resultantes de aplicar estos filtros a la imagen de entrada. Por ejemplo, de una imagen de tamaño $32\times 32$ proporcionada a una capa convolucional de 8 filtros se obtendrá una salida de tamaño $32 \times 32 \times 8$, o lo que es lo mismo, 8 imágenes $32 \times 32$.
 
 \subsubsection{Capa de activación - RELU \textit{(Rectifier Linear layer)}}
 \label{sec:relu}
 
 Al igual que en las redes clásicas es necesario tratar la salida de la aplicación de los pesos sobre las entradas con una función de activación. 
 
-La manera estándar de modelar la salida de una neurona en las RNAs es a través de $f(x) = tanh(x)$ o $f(x) = (1 + e^{-x})^{-1}$ (función sigmoide). A la hora de entrenar la red con descenso del gradiente, estas funciones mucho más lentas que otra función que también evita la linealidad: $f(x) = max(0, x)$, llamada ReLU (\textit{Rectifier Linear}). Las redes neuronales convolucionales entrenan varias veces más rápido usando ReLU (ver figura \ref{relu-vs-tanh}) que las equivalentes usando la función $tanh$ \parencite{krizhevsky2012imagenet}
+La manera habitual de modelizar la salida de una neurona en las RNAs es a través de $f(x) = tanh(x)$ o $f(x) = (1 + e^{-x})^{-1}$ (función sigmoide). A la hora de entrenar la red con descenso del gradiente, estas funciones son mucho más lentas que otra función que también evita la linealidad: $f(x) = max(0, x)$, llamada ReLU (\textit{Rectifier Linear}). Las redes neuronales convolucionales entrenan varias veces más rápido usando ReLU (ver figura \ref{relu-vs-tanh}) que las equivalentes usando la función $tanh$.
 
 \begin{figure}
     \centering
@@ -119,10 +121,9 @@ La manera estándar de modelar la salida de una neurona en las RNAs es a través
 
 \subsubsection{Capa de muestreo - POOL \textit{(Pooling layer)}}
 
-Al usar convoluciones en la imagen sobre el entorno de cada punto la información relevante de este queda difuminada y redundante. Gracias a esto se puede reducir el tamaño del problema mediante muestreo.
-Las capas de muestreo (\textit{pooling layers}) resumen las salidas del entorno de cada grupo de neuronas. Un ejemplo de función de muestreo sería elegir el valor máximo de cada cuadrado de 4 píxeles (figura \ref{maxpool})
+Al usar convoluciones en una imagen, la información del entorno de cada punto queda difumnada y redundante. Gracias a esto se puede reducir el tamaño del problema mediante muestreo. Las capas de muestreo (\textit{pooling layers}) resumen las salidas del entorno de cada grupo de neuronas. Un ejemplo de función de muestreo sería elegir el valor máximo de cada cuadrado de 4 píxeles (figura \ref{maxpool})
 
-Si la salida de una capa CONV + RELU es $32 \times 32 \times 8$, al aplicar la capa de muestreo, la salida se convertirá en $16 \times 16 \times 8$. Al eliminar el 75\% de las activaciones se reducen la cantidad de parámetros y el tiempo de computación, y además ayuda a reducir el sobreajuste.
+Si la salida de una capa CONV + RELU es $32 \times 32 \times 8$, al aplicar la capa de muestreo la salida se convertirá en $16 \times 16 \times 8$. Al eliminar el 75\% de las activaciones se reducen la cantidad de parámetros y el tiempo de computación, y además ayuda a reducir el sobreajuste.
 
 \begin{figure}
     \centering
@@ -147,6 +148,6 @@ Esta capa suele usarse al final de la arquitectura, cuando se han producido vari
   \includegraphics{conv-arch}
 \end{figure}
 
-Un esquema simplificado de un ejemplo de uso de las capas mencionadas se puede encontrar en la figura \ref{conv-arch}. La idea es, mediante capas CONV + RELU + POOL, transformar la imagen en una multitud de representaciones de conceptos cada vez más abstractos. Una vez se alcancen dichos conceptos, usar capas FC para modelar la salida de la red.
+Un esquema simplificado de un ejemplo de uso de las capas mencionadas se puede encontrar en la figura \ref{conv-arch}. La idea es, mediante capas CONV + RELU + POOL, transformar la imagen en una multitud de representaciones de conceptos cada vez más abstractos. Una vez se alcancen dichos conceptos, usar capas FC para modelizar la salida de la red.
 
 Como se verá en la solución presentada para este proyecto, en el capítulo \ref{cap:soluciones}, usar esta arquitectura permite apoyarse en determinadas estrategias para mejorar la eficacia del modelo predictivo.
