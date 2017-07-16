@@ -32,11 +32,13 @@ En imágenes en color se suele usar el sistema \textit{RGB (Red, Green, Blue)} p
 
 Para simplificar, algunos ejemplos de esta memoria van a usar una escala de grises, pero son aplicables a imágenes en color aplicando las operaciones a las tres diferentes capas al mismo tiempo.
 
-\subsection{Filtros}
+\section{Filtros convolucionales}
 
 Al trabajar con esta interpretación de lo que es una imagen, se pueden usar operaciones sobre la matriz de la imagen para transformarla de diferentes maneras.
 
-Imaginemos una matriz filtro de 3$\times$3 (también llamada matriz de convolución):
+Teniendo en cuenta cómo se representan, es claro que las imágenes digitales se pueden transformar mediante operaciones matriciales.
+
+Consideremos la siguiente matriz 3$\times$3 (llamada matriz filtro de convolución):
 
 \[
   F=
@@ -47,11 +49,15 @@ Imaginemos una matriz filtro de 3$\times$3 (también llamada matriz de convoluci
   \end{array} } \right]
 \]
 
-Se puede usar la matriz como un filtro para una imagende la siguiente manera: Primero, superponemos la matriz en algún punto de la imagen. Esto modificará el pixel donde ha quedado colocado el valor central de la matriz F. Multiplicamos cada uno de los valores superpuestos, sumamos los resultados y los sustituimos en el valor central. Esto se hace para cada píxel de la imagen original (superponer el filtro en ese píxel y sustituir el valor por la operación).
+Se puede usar $F$ como un filtro para una imagen de la siguiente manera: primero, superponemos la matriz en algún punto de la imagen. Esto modificará el pixel donde ha quedado colocado el valor central de la matriz F. Para ello multiplicamos cada uno de los valores superpuestos, sumamos los resultados y los sustituimos en el valor central. Esto se hace para cada píxel de la imagen original (superponer el filtro en ese píxel y sustituir el valor por la operación).
 
-En el caso de la matriz F, la fila superior son todos valores negativos, la intermedia son todos 1 y la inferior todos ceros. Si aplicamos la operación descrita con la matriz F sobre una imagen, los píxeles más brillantes (aquellos con mayor valor) serán los que su fila superior es cero, eliminando los valores negativos y la fila intermedia es 1. Esto ocurrirá con más frecuencia en los bordes superiores de objetos claros con fondo oscuro.
+En los bordes de la matriz existen menos píxeles adyacentes a cada píxel: seis en los bordes y tres en las esquinas. Para que la operación se haga con la misma cantidad de elementos se presupone que todos los valores que no existen son 0.
 
-Para ver la utilidad vamos a verlo aplicado a la imagen de un dígito escrito a mano, sacado del dataset MNSIT (cita req).
+En el caso de la matriz F, la fila superior son todos valores negativos, la intermedia son todos 1 y la inferior todos ceros. Si aplicamos entonces la operación descrita sobre una imagen, los píxeles más brillantes (aquellos con mayor valor) en la imagen resultante serán los que su fila superior es cero, eliminando los valores negativos y su fila intermedia es 1. 
+
+Esto ocurrirá con más frecuencia en los bordes superiores de objetos claros con fondo oscuro.
+
+Para mostar la utilidad de los filtros, los aplicaremos a la imagen de un dígito escrito a mano, sacado de la base de datos MNIST \parencite{lecun-mnisthandwrittendigit-2010}, que incluye 70000 imágenes de dígitos alfanuméricos escritos a mano.
 \begin{center}
   \includegraphics{seven}
 \end{center}
