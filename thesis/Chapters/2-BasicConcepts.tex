@@ -7,24 +7,30 @@
 Introducción a las redes neuronales, back-propagation, capas, input-outpus, etc
 
 
-\section{Convoluciones}
+\section{Imágenes digitales}
 
 Una imagen en el ámbito digital se entiende como una matriz de puntos.
-Cada uno de estos puntos puede ser interpretado como un número, que representa la localización de este punto en la escala de grises. Para representar la posición del punto en la escala de grises usaremos los valores menores para los puntos más oscuros y los mayores para los más claros.
+Cada uno de estos puntos puede ser interpretado como un número real entre 0 y 1, que representa la localización de este punto en la escala de grises. En esta representación usaremos valores menores para los puntos más oscuros y valores mayores para puntos más claros.
 
-Por lo tanto, una imagen como la siguiente:
-\begin{center}
-  \includegraphics{Seven_corner}
- % \makebox[\textwidth]{\includegraphics[width=\linewidth]{Seven_corner}}
-\end{center}
+Un ejemplo de esa representación es la matriz de la figura \ref{Seven_number}, que representa la imagen de la figura \ref{Seven_corner}.
 
-Sería representada por esta matriz.
+\begin{figure}
+    \centering
+    \caption{\textit{Imagen resultante de la matriz}}
+  \label{Seven_number}
+  \includegraphics[width=\textwidth]{Seven_number}
+\end{figure}
 
-\begin{center}
-  \makebox[\textwidth]{\includegraphics[width=\linewidth]{Seven_number}}
-\end{center}
+\begin{figure}
+    \centering
+    \caption{\textit{Imágen parcial en blanco y negro de un digíto escrito a mano}}
+  \label{Seven_corner}
+  \includegraphics[width=.6\textwidth]{Seven_corner}
+\end{figure}
 
-Para simplificar, la mayoría de los ejemplos van a usar una escala de grises, pero son aplicables a imágenes RGB aplicando las operaciones a las tres diferentes capas al mismo tiempo.
+En imágenes en color se suele usar el sistema \textit{RGB (Red, Green, Blue)} para representar diferentes colores en cada punto de la imagen. En vez de usar un solo valor por punto se usan tres valores, cada uno representando la intensidad del color rojo, verde y azul en ese punto. Superponiendo estos tres valores se consigue el color final. Por lo tanto, las imágenes \textit{RGB} constan de tres matrices, cada una con los valores reales entre 0 y 1 para cada color.
+
+Para simplificar, algunos ejemplos de esta memoria van a usar una escala de grises, pero son aplicables a imágenes en color aplicando las operaciones a las tres diferentes capas al mismo tiempo.
 
 \subsection{Filtros}
 
