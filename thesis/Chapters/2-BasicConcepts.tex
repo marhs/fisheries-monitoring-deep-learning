@@ -62,19 +62,19 @@ Para mostar la utilidad de los filtros, los aplicaremos a la imagen de un dígit
   \includegraphics{seven}
 \end{center}
 
-Si aplicamos el filtro a la imagen podemos observar como resalta en blanco los bordes superiores y en negro los inferioes. Filtros similares, rotando los valores del filtro F, son capaces de resaltar bordes lateras u oblicuos.
+Si aplicamos el filtro F a la imagen podemos observar cómo resalta en blanco los bordes superiores y en negro los inferioes. Filtros similares, rotando los valores del filtro F, son capaces de resaltar bordes laterales u oblicuos.
 
 \begin{center}
   \includegraphics{filters}
 \end{center}
 
-Lo interesante de este método es que hemos conseguido resaltar características del objeto representado en la imagen solo multiplicando matrices.
+Lo interesante de este método es que hemos conseguido resaltar características del objeto representado en la imagen simplemente con operaciones matricialessimplemente con operaciones matriciales.
 
-Las matrices de convolución pueden ser de mayor tamaño, permitiendo capturar características más complejas. La matrix de 3$\times$3 es la menor matriz que permite definir en su totalidad el concepto de espacio, pudiendo extraer características espaciales en dos dimensiones.
+Las matrices de convolución pueden ser de mayor tamaño, permitiendo capturar características más complejas. La matriz de 3$\times$3 es la menor matriz que permite definir en su totalidad el concepto de espacio, pudiendo extraer características espaciales en dos dimensiones.
 
 A la hora de trabajar con imágenes en color es necesario usar un modelo de color. Uno de los más usados, RGB, se compone de tres capas, una dedicada a la intensidad roja, otra a la verde y la última a la azul, de ahí su nombre. Cada filtro se aplicaría a cada capa por separado, permitiendo de esta manera detectar diferentes características de la imagen que ocurran solo en uno de los colores.
 
-Para ver como afectan diferentes filtros a una imagen, existe una página (http://setosa.io/ev/image-kernels/ mover a biblio) donde se pueden probar ejemplos con filtros personalizados, haciendo el concepto mucho más sencillo de comprender.
+Para analizar cómo afectan diferentes filtros a una imagen, existe una página \parencite{visualizer_convolution} donde se pueden probar ejemplos con filtros personalizados, haciendo el concepto mucho más sencillo de comprender.
 
 \section{Redes neuronales convolucionales}
 \label{sec:conv-net}
