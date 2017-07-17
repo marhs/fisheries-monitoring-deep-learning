@@ -6,23 +6,23 @@
 \section{Metodología}
 \label{sec:metodology}
 
-La puntuación final de la competición será calculada mediante una función de pérdida logarítmica, como vimos en el apartado \ref{sec:envio-y-eval}. Al no tener las categorías del conjunto de datos de test debemos delegar el cálculo de la puntuación en Kaggle, que permite enviar hasta cinco predicciones al día. Esto es un obstáculo para hacer pequeñas pruebas e iterar rápido sobre los resultados. Por otra parte, el segundo conjunto de test tiene más de 13000 imágenes, que no son rápidas de cargar en memoria ni de pasar por el modelo que se genere. En determinados casos la evaluación del segundo conjunto de test ha tardado más de 6 horas.
+La puntuación final de la competición será calculada mediante una función de pérdida logarítmica, como vimos en el apartado \ref{sec:envio-y-eval}. Al no tener las categorías del conjunto de datos de test debemos delegar el cálculo de la puntuación en \textit{Kaggle}, ,que permite enviar hasta cinco predicciones al día. Esto es un obstáculo para hacer pequeñas pruebas e iterar rápido sobre los resultados. Por otra parte, el segundo conjunto de test tiene más de 13000 imágenes, que no son rápidas de cargar en memoria ni de pasar por el modelo que se genere. En determinados casos la evaluación del segundo conjunto de test ha tardado más de 6 horas.
 
 La solución a este problema se ha resuelto usando un subconjunto del conjunto de entrenamiento dedicado solo a la evaluación de modelos. Por otra parte, para el entrenamiento es necesario usar un subconjunto de validación, por lo tanto es necesario dividir el conjunto de entrenamiento original en tres subconjuntos: entrenamiento, validación y test.
 
-La partición se ha realidado dejando un \textbf{60\%} de los datos al conjunto de entrenamiento, un \textbf{20\%} al conjunto de validación y un \textbf{20\%} al conjunto de test.
+La partición se ha realizado dejando un \textbf{60 \%} de los datos al conjunto de entrenamiento, un \textbf{20 \%} al conjunto de validación y un \textbf{20 \%} al conjunto de test.
 
 
-\subsection{Partición de conjuntos de datos}
-La partición del conjunto de datos es una operación delicada. Ya vimos que uno de los problemas del dataset era que la cantidad de imágenes para cada clase era muy variada, teniendo algunas clases un número muy bajo de ejemplos. Si sacamos el 40\% de las imágenes del dataset, podemos estar vaciando una o varias categorías de ejemplos de entrenamiento, haciendo inútil cualquier clasificación de esas clases.
+\subsection{Partición del conjuntos de datos}
+La partición del conjunto de datos es una operación delicada. \textbf{Ya vimos} que uno de los problemas del conjunto de datos era que la cantidad de imágenes para cada clase era muy variada, teniendo algunas clases un número muy bajo de ejemplos. Si seleccionamos aleatoriamente el 40 \% de las imágenes, es posible que no se elijan ejemplos de una o varias de las categorías, con lo que los modelos construidos no las tendrían en cuenta.
 
-La solución por la que se ha optado es generar un subconjunto del 20\% usando el 20\% de los ejemplos de cada clase, evitando así vaciar alguna de las clases.
+La solución adoptada ha sido realizar un muestreo estratificado, seleccionando aleatoriamente el 20\% de los ejemplos de cada clase.
 
 \subsection{Evaluación del modelo}
 
-Para una búsqueda más óptima de parámetros y configuraciones el modelo se evaluará contra el grupo de test generado. Una vez se encuentren determinados modelos especialmente interesantes por tener una puntuación máxima local entre aquellos a los que se compara habrá que enviarlo a Kaggle para su evaluación completa.
+Para una búsqueda más óptima de parámetros y configuraciones el modelo se evaluará contra el grupo de test generado. Una vez se encuentren determinados modelos especialmente interesantes por tener una puntuación máxima local entre aquellos a los que se compara habrá que enviarlo a \textit{Kaggle} para su evaluación completa.
 
-Enviar el modelo a Kaggle se puede hacer sobre una partición más grande del conjunto de entrenamiento, ya que no es necesario usar un conjunto de test para evaluar, solo uno de validación. Esto permite entrenar el modelo sobre el 80\% de los datos consiguiendo, por lo general, resultados más precisos.
+Enviar el modelo a \textit{Kaggle} se puede hacer sobre una partición más grande del conjunto de entrenamiento, ya que no es necesario usar un conjunto de test para evaluar, solo uno de validación. Esto permite entrenar el modelo sobre el 80\% de los datos consiguiendo, por lo general, resultados más precisos.
 
 \subsection{Software}
 
