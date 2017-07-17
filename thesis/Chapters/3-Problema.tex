@@ -10,32 +10,39 @@
 
 \section{Kaggle}
 
-Kaggle es una plataforma donde se organizan competiciones de modelos predictivos o de aprendizaje automático sobre un problema real. Diferentes organizaciones plantean un problema y ofrecen un premio para el mejor modelo que lo resuelva, haciendo que miles de participantes prueben ideas diferentes y consigan puntos de vista que, en organizaciones tradicionales, un solo equipo no tendría.
+\textit{Kaggle }es una plataforma donde se organizan competiciones de modelos predictivos o de aprendizaje automático sobre un problema real. Diferentes organizaciones plantean un problema y ofrecen un premio para el mejor modelo que lo resuelva, haciendo que miles de participantes prueben ideas diferentes y consigan puntos de vista que, en organizaciones tradicionales, un solo equipo no tendría.
 
 En este trabajo se ha optado por la participación en uno de esos problemas, The Nature Conservancy Fisheries Monitoring.
 
-\section{The Nature Conservancy Fisheries Monitoring}
+\section{\textit{ The Nature Conservancy Fisheries Monitoring }}
 
-En el océano pacífico, donde se captura más del 60\% del atún del mundo, tienen lugar prácticas de pesca irregular que amenazan a los ecosistemas marinos y a la estabilidad de la pesca mundial. The Nature Conservancy es una asociación que trabaja con organizaciones locales y globales para preservar las especies marinas de cara al futuro.
+En el océano pacífico, donde se captura más del 60\% del atún del mundo, tienen lugar prácticas de pesca irregular que amenazan a los ecosistemas marinos y a la estabilidad de la pesca mundial. \textit{The Nature Conservancy} es una asociación que trabaja con organizaciones locales y globales para preservar las especies marinas de cara al futuro.
 
 La principal idea para controlar la pesca y explotación de recursos marinos es el uso de cámaras en barcos, que ayudan a monitorizar las actividades pesqueras de estos. Aunque funciona muy bien como sistema de control, la cantidad de datos e imágenes generadas hace que sea muy costoso de procesar manualmente.
 
-\begin{center}
-  \makebox[\textwidth]{\includegraphics[width=\linewidth]{kaggle-competition-banner}}
-\end{center}
+\begin{figure}
+  \centering
+  \caption{\textit{Ejemplo de imágenes tomadas en barcos pesqueros para su posterior identificación}}
+\label{kaggle-banner}
+  \includegraphics[width=\textwidth]{kaggle-competition-banner}
+\end{figure}
 
-La idea de este reto es desarrollar algoritmos que detecten y clasifiquen automáticamente especies de atunes, tiburones y otras especies que estos barcos pesqueros cazan. El hecho de que se pueda analizar este tipo de imágenes de una manera rápida y automática permitirá asignar recursos de una manera mucho más efectiva para el control de este tipo de actividades. (Cita: fisheries monitoring)
+La idea de este reto es desarrollar algoritmos que detecten y clasifiquen automáticamente especies de atunes, tiburones y otras especies que estos barcos pesqueros cazan. El que se pueda analizar imágenes como las de la figura \ref{kaggle-banner} de una manera rápida y automática permitirá asignar recursos de una manera mucho más efectiva para el control de este tipo de actividades \parencite{kaggle-page}.
 
 \section{Definición del problema}
 
-El problema consiste en clasificar cada una de las imágenes de un conjunto de imágenes de barcos en una de las ocho categorías disponibles. Las imágenes suelen mostrar la cubierta de un barco donde puede aparecer un pez. En base al pez que aparezca hay que clasificarlo en una de las siguientes seis categorías:
+El problema consiste en clasificar cada una de las imágenes de un conjunto de imágenes de barcos en una de las ocho categorías disponibles. Las imágenes suelen mostrar la cubierta de un barco donde puede aparecer un pez. En base al pez que aparezca hay que clasificarlo en una de las seis categorías mostradas en la figura:
 
-\begin{center}
-  \makebox[\textwidth]{\includegraphics[width=\linewidth]{species-ref-key}}
-\end{center}
+\begin{figure}
+  \centering
+  \caption{Especies de peces a clasificar en el reto}
+\label{kaggle-fishes}
+  \includegraphics[width=\textwidth]{species-ref-key}
+\end{figure}
 
-En caso de que no aparezca ningún pez en la imagen, esta tendrá la categoría NOF (No Fish). Y si aparece un pez en la imagen pero no perteneciente a ninguna de las categorías mencionadas, la categoría será OTHER.
+En caso de que no aparezca ningún pez en la imagen, esta tendrá la categoría NOF (\textit{No Fish}). Y si aparece un pez en la imagen pero no perteneciente a ninguna de las categorías mencionadas, la categoría será OTHER.
 
+En resumen, el conjunto de posibles categorías es:
 \[
   categories =
   \left[ALB, BET, DOL, LAG, SHARK, YFT, OTHER, NOF]
@@ -43,7 +50,7 @@ En caso de que no aparezca ningún pez en la imagen, esta tendrá la categoría 
 
 \subsection{Datos}
 
-El descargable que se provee en el reto consta de tres elementos:
+La competición proporciona tres ficheros con los que trabajar:
 
 \begin{enumerate}
   \item{Conjunto de datos de entrenamiento: 3777 imágenes etiquetadas con una de las ocho categorías existentes.}
@@ -68,27 +75,22 @@ img\_00009.jpg & 0.455 & 0.052 & 0.030 & 0.0173 & 0.123 & 0.079 & 0.046 & 0.194
 \end{tabular}
 \end{table}
 
-El envío se evalúa usando multi-class logarithmic loss. Cada imagen ha sido etiquetada con una clase, pero es necesario enviar las probabilidades de cada clase para cada imagen. La formula final es:
-
+Los resultados enviados se evalúan mediante una función de pérdida logarítmica multiclase. Concretamente se usa la fórmula:
 \[
   logloss =
   - \frac{1}{N} \sum_{i=1}^N \sum_{j=1}^M y_{ij} \log \, p_{ij}
-\],
- siendo N el número de imágenes en el conjunto de test, M el número de clases, $y_{ij}$ es 1 si la observación $i$ pertenece a la clase $j$ y 0 si no pertenece y $p_{ij}$ la probabilidad predecida de que el elemento $i$ pertenezca a la clase $j$.
+\]
+ siendo N el número de imágenes en el conjunto de test, M el número de categorías, $y_{ij}$ 1 si la observación $i$ pertenece a la clase $j$ y 0 si no pertenece y $p_{ij}$ la probabilidad predicha de que el elemento $i$ pertenezca a la clase $j$.
 
- \subsecion{Leaderboard y fases de la competición}
+ \subsection{Leaderboard y fases de la competición}
 
- Existe una tabla donde se publican los resultados de los envíos de cada participante. Estos resultados están calculados solo con un subconjunto del conjunto de test, de esta manera se evita que los participantes puedan aprovechar un sobreajuste para subir en la clasificación.
+Cuando un participante envía una predicción, \textit{Kaggle }calcula la puntuación de dicho envío sobre un subconjunto del conjunto de test, mostrando la puntuación en una tabla de clasificación pública. Se usa un subconjunto para enviar que los participantes puedan aprovechar un sobreajuste a la hora de entrenar el modelo. Al llegar a la fecha de entrega de las predicciones y modelos se recalculará esta tabla con todo el conjunto de test.
 
-La puntuación final vendrá determinada por la puntuación de todo el conjunto de test.
+Antes de terminar la primera fase de la competición los participantes deberán subir a \textit{Kaggle} el modelo utilizado y seleccionar las dos predicciones que quieren usar para la puntuación con el conjunto completo. La puntuación de estas predicciones se hará usando todo el conjunto de test y se publicará en una tabla de clasificación privada, solo visible para los participantes. 
 
-Esta manera de evaluar es algo bastante común en kaggle, sin embargo los organizadores de este reto en particular han decidido hacer un pequeño cambio a la hora de evaluar la puntuación.
+Una vez terminada la primera fase, \textit{Kaggle} publicará un nuevo conjunto de test, con el que los participantes deberán clasificar usando el modelo entregado al final de la fase anterior.
 
-\subsection{Doble fase de evaluación y envío}
-
-La evaluación en este reto contará de dos partes. La primera, donde se entrenará el modelo, requiere (como ya se ha dicho) evaluar el conjunto de test de mil imágenes. La fecha límite para la entrega de modelos de esta primera fase es siete días antes de la finalización del reto. Será necesario enviar el CSV con las predicciones y el modelo usado.
-
-Una vez finalice la primera fase, un segundo conjunto de test de muchas más imágenes será hecho público. Este conjunto de test deberá ser evaluado con el modelo generado en la fase anterior, siendo razón de descalficación modificar el modelo. Todos los participantes que no envíen la predicción de la segunda fase serán eliminados del reto.
+En esta segunda fase, que dura solo cinco días, el procedimiento es el mismo. Se publicarán puntuaciones usando un subconjunto del segundo conjunto de test y al terminar se publicará la puntuación usando el conjunto completo. Esta última puntuación será la puntuación final de la competición. Si alguno de los participantes ha hecho un envío en la primera fase pero no ha hecho ninguno en la segunda, quedará eliminado de la competición.
 
 \section{El conjunto de datos}
 
