@@ -34,11 +34,11 @@ Todos los modelos de redes convolucionales que se van a entrenar en este proyect
 \section{Idea}
 A la hora de afrontar este problema de clasificación de peces es natural
 seguir una estrategia separada en dos pasos: primero buscar si
-existe un pez en la imágen y luego intentar clasificarlo en una de las 
-categorías existentes. 
+existe un pez en la imágen y luego intentar clasificarlo en una de las
+categorías existentes.
 
 Para buscar un pez en una imágen es necesario encontrar una serie de
-características que puedan ser identificadas con algún pez. La idea de 
+características que puedan ser identificadas con algún pez. La idea de
 la solución parte de esta base. Para clasificar una imagen,
 primero es necesario encontrar el contenido relevante para ser usado
 en la clasificación.
@@ -61,7 +61,7 @@ La figura \ref{general-architecture} representa la red convolucional profunda us
   \makebox[\textwidth]{\includegraphics[width=\linewidth]{imagenet-arch}}
 \end{figure}
 
-La idea no es solo usar la arquitectura de este tipo de redes, sino también sus entrenamientos. ILSVRC debe clasificar entre 1000 categorías diferentes, por lo que necesita poder generalizar mucho a la hora de extraer características de las imágenes. Para aplicar esto al reconocimiento de peces, extraeremos las características de las imágenes y usaremos otro modelo para clasificar en nuestras ocho categorías usando estas características. De esta manera podremos aprovechar la potencia de este tipo de redes con modificaciones adaptadas a nuestro problema. 
+La idea no es solo usar la arquitectura de este tipo de redes, sino también sus entrenamientos. ILSVRC debe clasificar entre 1000 categorías diferentes, por lo que necesita poder generalizar mucho a la hora de extraer características de las imágenes. Para aplicar esto al reconocimiento de peces, extraeremos las características de las imágenes y usaremos otro modelo para clasificar en nuestras ocho categorías usando estas características. De esta manera podremos aprovechar la potencia de este tipo de redes con modificaciones adaptadas a nuestro problema.
 
 \subsection{Red convolucional}
 
@@ -116,7 +116,7 @@ train, train_labels = get_data(path + 'train')
 valid, valid_labels = get_data(path + 'valid')
 test, test_labels = get_data(path + 'test')
 
-# Convertir dataset a features mediante la red convolucional 
+# Convertir dataset a features mediante la red convolucional
 train_feat = conv_model.predict(train)
 valid_feat = conv_model.predict(valid)
 test_feat = conv_model.predict(test)
@@ -165,7 +165,7 @@ El segundo número que devuelve la función $evaluate$ es la precisión ($accura
 
 \section{Modelo completamente conectado}
 
-La idea original que se comentaba al principio consistía en separar el problema en el modelo convolucional y el modelo de clasificación. Es en el segundo donde se puede conseguir toda la flexibilidad. 
+La idea original que se comentaba al principio consistía en separar el problema en el modelo convolucional y el modelo de clasificación. Es en el segundo donde se puede conseguir toda la flexibilidad.
 
 El modelo original de VGG usa dos capas $densas$ de 4096 neuronas para clasificar entre mil clases diferentes. Ya que este problema tiene solo ocho clases diferentes probablemente no sea necesario usar capas tan grandes, por lo que se procede a probar la misma estructura original pero con capas cuatro veces más pequeñas que las originales.
 
@@ -309,7 +309,7 @@ train, train_labels = get_data(path + 'train')
 valid, valid_labels = get_data(path + 'valid')
 test, test_labels = get_data(path + 'test')
 
-# Convertir dataset a features mediante la red convolucional 
+# Convertir dataset a features mediante la red convolucional
 train_feat = conv_model.predict(train)
 valid_feat = conv_model.predict(valid)
 test_feat = conv_model.predict(test)
@@ -332,7 +332,7 @@ TODO: poner aqui la clasificacion de kaggle de este modelo, que es uno de los pr
 
 Uno de los principales obstáculos de este problema es el reducido tamaño del conjunto de datos de entrenamiento. El tener pocos ejemplos sobre los que entrenar hace que al modelo le cueste generalizar sobre los ejemplos disponibles, produciéndose un sobreajuste.
 
-Uno de los métodos que se usan para tratar de reducir el sobreajuste del modelo es el llamado aumento de datos (\textit{data augmentation}). Consiste en generar imágenes de entrenamiento adicionales a partir de las ya disponibles, rotando la imagen original, aumentándola, cambiando ligeramente el color, etc. 
+Uno de los métodos que se usan para tratar de reducir el sobreajuste del modelo es el llamado aumento de datos (\textit{data augmentation}). Consiste en generar imágenes de entrenamiento adicionales a partir de las ya disponibles, rotando la imagen original, aumentándola, cambiando ligeramente el color, etc.
 
 En el caso de nuestro problema esta técnica es especialmente interesante, ya que las cámaras de los barcos están fijas apuntando siempre a la misma zona. En las fotos sobre los peces capturados, estos siempre suelen estar con la cabeza apuntando en dirección contraria al agua. Ello hace que la red reconozca más fácilmente peces dispuestos en una determinada dirección pero costándole más trabajo para el resto de direcciones. Si las redes convolucionales ayudaban a detectar determinados patrones en cualquier punto de la imagen, el aumento de datos hace lo propio de otras variantes como la rotación, el tamaño o el filtro de color dado por el ambiente.
 
@@ -363,7 +363,7 @@ image_generator = image.ImageDataGenerator(
 )
 
 batches = img_generator.flow_from_directory(
-    path+'test_aug', 
+    path+'test_aug',
     target_size=(224,224),
     class_mode='categorical',
     shuffle=False,
@@ -392,7 +392,7 @@ dense_model.evaluate(test_feat, test_labels)
 >>> [0.15222558558899649, 0.96723868954758185]
 \end{python}
 
-El modelo, que ahora ha predicho correctamente casi un 97\% de las imágenes del conjunto de test, ha aumentado ligeramente la puntuación de pérdida logarítmica. Hay que tener en cuenta que a medida que esta puntuación tiende a cero, es más difícil disminuirla, ya que corresponde cada vez más a un modelo casi perfecto. 
+El modelo, que ahora ha predicho correctamente casi un 97\% de las imágenes del conjunto de test, ha aumentado ligeramente la puntuación de pérdida logarítmica. Hay que tener en cuenta que a medida que esta puntuación tiende a cero, es más difícil disminuirla, ya que corresponde cada vez más a un modelo casi perfecto.
 
 Cuando hablamos de un modelo casi perfecto, nos referimos respecto al conjunto de test elegido. En este caso, debido al pequeño tamaño del conjunto de test, la perfección del modelo estará lejos de la perfección del modelo real que va a ser probado en el reto.
 
@@ -410,7 +410,7 @@ Aquí se estaría desarrollando una idea que se comentaba al principio de este t
 \begin{python}
 def build_conv_layers():
     return [
-        BatchNormalization(axis=1, 
+        BatchNormalization(axis=1,
             input_shape=conv_layers[-1].output_shape[1:]
         ),
         Convolution2D(128, 3, 3, activation='relu', border_mode='same'),
@@ -420,7 +420,7 @@ def build_conv_layers():
         Convolution2D(128, 3, 3, activation='relu', border_mode='same'),
         BatchNormalization(axis=1),
         Convolution2D(8, 3, 3, border_mode='same'),
-        
+
         # Output layer
         GlobalAveragePooling2D(),
         Activation('softmax'),
@@ -484,7 +484,7 @@ Esto pertime tomar ciertas decisiones sobre el entrenamiento del modelo. Por eje
 
 \section{Modelo con entrada múltiple}
 
-Un examen detallado del conjunto de datos de entrada nos permite detectar determinadas propiedades de las imágenes cuyo uso podría permitir una mejora de los modelos. Por ejemplo, las imágenes están tomadas en diferentes barcos, con diferentes modelos de cámaras. No todas las cámaras generan imágenes del mismo tamaño, por lo que se podría averiguar el barco del que se ha tomado la fotografía por el tamaño de la imagen. 
+Un examen detallado del conjunto de datos de entrada nos permite detectar determinadas propiedades de las imágenes cuyo uso podría permitir una mejora de los modelos. Por ejemplo, las imágenes están tomadas en diferentes barcos, con diferentes modelos de cámaras. No todas las cámaras generan imágenes del mismo tamaño, por lo que se podría averiguar el barco del que se ha tomado la fotografía por el tamaño de la imagen.
 
 Ya que cada barco suele pescar diferentes tipos de peces con mayor o menor probabilidad, el conocer el tipo de barco puede ser aprovechado por el modelo para balancear las posibilidades de cada categoría dependiendo del tipo de pesca que suela llevar.
 
@@ -523,6 +523,7 @@ dense_model = keras.models.Model(
 \end{python}
 
 Tras construir el modelo con las entradas múltiples y entrenarlo sobre los dos conjuntos de entrenamiento (las imágenes y los tamaños de las imágenes) vemos la evaluación del modelo.
+
 \begin{python}
 dense_model.evaluate(test_feat, test_labels)
 >>> [0.1725, 0.9413]
@@ -534,19 +535,45 @@ Aunque la idea es buena, lo que está haciendo por debajo es clasificar los dife
 
 \subsubsection{Fuga de datos}
 
-Esta idea de usar datos diferentes del conjunto de datos para clasificar es algo muy usado en los torneos de modelos predictivos. No solo funciona el tamaño de la foto, sino a veces las fotos tienen datos adicionales, como información GPS, hora de creación o modelo de cámara.
+Esta idea de usar datos diferentes del conjunto de datos para clasificar es algo muy usado en las competiciones de modelos predictivos. No solo funciona el tamaño de la foto, sino a veces las fotos tienen datos adicionales, como información GPS, hora de creación o modelo de cámara.
 
 No todos estos datos son publicados de una manera voluntaria por comunidades de campeonatos, pero son útiles para conseguir una pequeña mejora en el modelo, siempre que el modelo puede aprovecharse de estos datos.
 
 \section{Salida múltiple}
 
-Se ha explorado la idea de usar un modelo que tenga diferentes fuentes de entrada. También se puede intentar un modelo con diferentes salidas. Una idea sería no solo averiguar el tipo de pez, sino también dónde se encuentra en la imagen.
+Como vimos anteriormente en la figura \ref{yft-heatmap} la red completamente convolucional es capaz de clasificar correctamente la imagen, un atún de cola amarilla, pero por las razones incorrectas: los pantalones del pescador. Un modelo que sea capaz de clasificar la imagen e identificar la localización del pez podría evitar este tipo de errores. Intuitivamente tiene sentido, ya que es lógico buscar primero si hay un pez en la imagen y luego distinguir a qué categoría pertenece.
 
-Esta estructura hará que el modelo tenga que predecir dos cosas al mismo tiempo, lo cual hace que sea más difícil una convergencia de este. Por otro lado si consige una buena puntuación tiene menos probabilidades de fallar. En el ejemplo de la figura 4.9 debería encontrar el pez en la imagen a la vez que determina su tipo. La red completamente convolucional era capaz de predecir que el pez era un atún de cola amarilla, pero por las razones incorrectas (los pantalones amarillos). Con la doble salida no será capaz, ya que tendrá la localización incorrecta del pez.
+Al usar técnicas de aprendizaje supervisado es necesario ejemplos resueltos para poder generar un modelo y el conjunto de datos del problema no posee ninguna información sobre la localización de los peces en la imagen.
 
-Para entrenar las localizaciones de los peces en las imágenes se ha usado el conjunto de datos que uno de los participantes de \textit{kaggle} ha hecho público: un conjunto con las coordenadas de los rectángulos que contienen un pez en cada imagen.
+Las reglas de la competición en Kaggle indican que es posible usar conjuntos de datos auxiliares generados por los usuarios, siempre que estos se hagan públicos y estén disponibles para todos los participantes. Afortunadamente un usuario ha publicado un conjunto de datos que contienen las coordenadas de los rectángulos de todos las imágenes del conjunto de entrenamiento.
+
+El conjunto de datos consiste en un archivo \textit{json} con la siguiente estructura.
+
+\begin{python}
+{
+    "annotations": [
+        {
+            "class": "rect",
+            "height": 79.0,
+            "width": 256.0,
+            "x": 815.0,
+            "y": 124.0
+        }
+    ],
+    "class": "image",
+    "filename": "img_07795.jpg"
+},
+\end{python}
+
+Cada rectángulo se define mediante su altura (height), anchura (width) y las coordenadas del centro del rectángulo (x, y). Algunas imágenes contienen varios peces, por lo que su clave en el conjunto de datos contienen varios rectángulos.
+
+Si pintamos uno de los rectángulos encima de la imagen a la que corresponde obtenemos la imagen de la figura \ref{box}, que captura correctamente la ubicación del pez.
+
+Para usar esta información en el modelo vamos a usar un modelo de salida múltiple. Este modelo, dada una imagen, devolverá una posible clasificación de la imagen y al mismo tiempo generará las coordenadas de un rectángulo que contenga el pez. El modelo tendrá que usar las mismas características de cada imágen para devolver am
+
+
 \begin{figure}
-  \caption{Ejemplo del dataset de localizaciones de peces}
+  \caption{Representación de un rectángulo del conjunto de datos auxiliar que ubica cada pez en su imagen}
 \label{box}
   \makebox[\textwidth]{\includegraphics[width=0.5\linewidth]{box}}
 \end{figure}
