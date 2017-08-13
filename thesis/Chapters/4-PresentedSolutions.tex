@@ -172,7 +172,7 @@ El modelo original de VGG usa dos capas $densas$ de 4096 neuronas para clasifica
 La estructura, por lo tanto, quedaría de la misma manera pero usando dos capas densas de 512 neuronas cada una y una capa densa final de 8. Para no tener que estar modificando el modelo original cada vez que haga falta es mucho más sencillo crear un modelo nuevo con $Keras$ y añadir todas las capas necesarias.
 
 \begin{python}
-def build_dense_layers():
+def list_dense_layers():
     return [
         Flatten(),
         Dense(512, activation='relu'),
@@ -180,7 +180,7 @@ def build_dense_layers():
         Dense(8, activation='softmax')
     ]
 
-dense_model = keras.models.Sequential(build_dense_layers())
+dense_model = keras.models.Sequential(list_dense_layers())
 \end{python}
 
 Un paso importante a la hora de construir el modelo personalizado es tener en cuenta que las salidas de las redes convolucionales poseen tres dimensiones ($ancho \times alto \times filtros$), mientras que la redes neuronales densas poseen solo una dimensión. Es necesario convertir la salida de estas capas a una entrada permitida. \textit{Keras} ya ofrece esta posibilidad usando una capa abstracta llamada \textit{Flatten}.
@@ -245,17 +245,17 @@ Por otra parte, también es importante pensar dónde se pierden las activaciones
 La definición de la red anterior quedaría de la siguiente manera:
 
 \begin{python}
-def build_dense_layers(p):
+def list_dense_layers(dropout):
     return [
         Flatten(),
-        Dropout(p/4),  # Aplicar 1/4 del dropout definido (p)
+        Dropout(dropout/4),  # Aplicar 1/4 del dropout definido 
         Dense(512, activation='relu'),
-        Dropout(p),
+        Dropout(dropout),
         Dense(512, activation='relu'),
-        Dropout(p/2),  # Aplicar la mitad del dropout definido
+        Dropout(dropout/2),  # Aplicar la mitad del dropout definido
         Dense(8, activation='softmax'),
     ]
-dense_model = keras.models.Sequential(build_dense_layers(0.45))
+dense_model = keras.models.Sequential(list_dense_layers(0.45))
 \end{python}
 
 Los resultados obtenidos con esta configuracion no mejoran los resultados de la red anterior, pero como se ve en la figura \ref{dropout} sí que lo hará a posteriori, cuando se le apliquen otro tipo de modificaciones al modelo. Modelos como VGG ya incluyen \textit{dropout} (solo en las redes densas), por lo que al hacer fine-tuning con una red personalizada es necesario usarlo para mantener los resultados originales.
@@ -277,20 +277,20 @@ Los modelos actuales que usan esta normalización por lotes consiguen la misma p
 Para aplicar esta normalización por lotes al modelo que se está entrenando hay que añadir las capas de normalización por lotes (también disponibles en Keras) al modelo denso:
 
 \begin{python}
-def build_dense_layers(p):
+def list_dense_layers(dropout):
     return [
         BatchNormalization(axis=1),
         Flatten(),
-        Dropout(p/4),
+        Dropout(dropout/4),
         Dense(512, activation='relu'),
         BatchNormalization(),
-        Dropout(p),
+        Dropout(dropout),
         Dense(512, activation='relu'),
         BatchNormalization(),
-        Dropout(p/2),
+        Dropout(dropout/2),
         Dense(8, activation='softmax'),
     ]
-dense_model = keras.models.Sequential(build_dense_layers(0.45))
+dense_model = keras.models.Sequential(list_dense_layers(0.45))
 \end{python}
 
 Esto no es suficiente. A diferencia del \textit{dropout}, la normalización por lotes sí que es capaz de mejorar la red convolucional del modelo preentrenado. Gracias a la popularidad de esta técnica y de los modelos preentrenados que se usan en este trabajo, ya existen entrenamientos del modelo VGG original usando normalización por lotes, ahorrando la necesidad de entrenar una red tan grande. Una descripción de esto entrenamientos se puede encontrar en \parencite{pretrained_with_bn}.
@@ -315,7 +315,7 @@ valid_feat = conv_model.predict(valid)
 test_feat = conv_model.predict(test)
 
 # Entrenar la red
-dense_model = keras.models.Sequential(build_dense_layers(0.45))
+dense_model = keras.models.Sequential(list_dense_layers(0.45))
 dense_model.compile(...)
 dense_model.fit(...)
 # Evaluar el modelo sobre el conjunto de test
@@ -483,38 +483,55 @@ Esto pertime tomar ciertas decisiones sobre el entrenamiento del modelo. Por eje
 \end{figure}
 
 \section{Modelo con entrada múltiple}
+\label{sec:multi_entry}
 
 Un examen detallado del conjunto de datos de entrada nos permite detectar determinadas propiedades de las imágenes cuyo uso podría permitir una mejora de los modelos. Por ejemplo, las imágenes están tomadas en diferentes barcos, con diferentes modelos de cámaras. No todas las cámaras generan imágenes del mismo tamaño, por lo que se podría averiguar el barco del que se ha tomado la fotografía por el tamaño de la imagen.
 
 Ya que cada barco suele pescar diferentes tipos de peces con mayor o menor probabilidad, el conocer el tipo de barco puede ser aprovechado por el modelo para balancear las posibilidades de cada categoría dependiendo del tipo de pesca que suela llevar.
 
-Obviamente la idea no es hacer todo esto a mano, sino entrenar un modelo que tenga en cuenta tanto las imágenes como otra información válida. En este caso se va a elegir el modelo denso, con la diferencia que la última capa tendrá dos entradas: la salida de las capas ocultas de la red neuronal y el tamaño de la imagen, codificado en \textit{onehot}.
+La idea no es hacer todo esto a mano, sino entrenar un modelo que tenga en cuenta tanto las imágenes como otra información válida.
 
-TODO Hacer un esquema de las arquitectura de la red.
+En este caso se va a elegir el modelo denso, con la diferencia que la última capa tendrá dos entradas: la salida de las capas ocultas de la red neuronal y el tamaño de la imagen, codificado en \textit{onehot}.
+
+Para este modelo y posteriores modificaciones vamos a definir una función
+llamada \textit{build\_dense\_layers} que genere la red posterior a la red
+convolucional sin la capa de clasificación final. Es decir, tres capas densas de
+512 entradas, \textit{dropout}, y normalización por lotes.
 
 \begin{python}
-def build_dense_layers(p):
+def build_dense_layers(dropout=0.5):
     # Usamos las entradas de la red convolucional, como antes
     inp = Input(conv_layers[-1].output_shape[1:])
     x = MaxPooling2D()(inp)
     x = BatchNormalization(axis=1)
     x = Flatten()
-    x = Dropout(p/4)
+    x = Dropout(dropout/4)
     x = Dense(512, activation='relu')
     x = BatchNormalization()
-    x = Dropout(p)
+    x = Dropout(dropout)
     x = Dense(512, activation='relu')
     x = BatchNormalization()
-    x = Dropout(p/2)
-
-    # Usamos las entradas de las dimensiones de cada elemento
-    size_inputs = Input(len(sizes))
-    bn_inputs = BatchNormalization()(size_inputs)
-
-    # Unimos ambas entradas en una última capa
-    x = merge([x, bn_inp], 'concat']
-    x = Dense(8, activation='softmax')
+    x = Dropout(dropout/2)
     return x
+
+\end{python}
+
+Usando esta función, añadimos una capa final para la clasificación, cuya entrada
+será la union entre la red densa y la información sobre los tamaños de las
+imágenes. Esta capa deberá clasificar cada imágen usando tanto la información
+disponible de la red densa como el barco al que pertenece.
+
+\begin{python}
+net = build_dense_layers()
+# Usamos las entradas de las dimensiones de cada elemento
+size_inputs = Input(len(sizes))
+bn_inputs = BatchNormalization()(size_inputs)
+
+# Unimos ambas entradas en una última capa
+net = merge([net, bn_inputs], 'concat']
+net = Dense(8, activation='softmax')(x)
+return x
+
 
 dense_model = keras.models.Model(
     [inp, size_inputs],  # El modelo ahora tiene multi entrada
@@ -541,11 +558,29 @@ No todos estos datos son publicados de una manera voluntaria por comunidades de 
 
 \section{Salida múltiple}
 
-Como vimos anteriormente en la figura \ref{yft-heatmap} la red completamente convolucional es capaz de clasificar correctamente la imagen, un atún de cola amarilla, pero por las razones incorrectas: los pantalones del pescador. Un modelo que sea capaz de clasificar la imagen e identificar la localización del pez podría evitar este tipo de errores. Intuitivamente tiene sentido, ya que es lógico buscar primero si hay un pez en la imagen y luego distinguir a qué categoría pertenece.
+Como vimos anteriormente en la figura \ref{yft-heatmap} la red completamente
+convolucional es capaz de clasificar correctamente la imagen pero por las
+razones incorrectas: los pantalones amarillos del pescador. Un modelo que sea
+capaz de clasificar la imagen e identificar la localización del pez podría
+evitar este tipo de errores. Intuitivamente esta idea tiene sentido, ya que es lógico
+buscar primero si hay un pez en la imagen y luego distinguir a qué categoría
+pertenece.
 
-Al usar técnicas de aprendizaje supervisado es necesario ejemplos resueltos para poder generar un modelo y el conjunto de datos del problema no posee ninguna información sobre la localización de los peces en la imagen.
+Al usar técnicas de aprendizaje supervisado como las que estamos usando es
+necesario ejemplos resueltos para poder generar un modelo. Si queremos un modelo
+que localice pez en la imagen necesitaremos ejemplos de dicha
+localización para el conjunto de entrenamiento, cosa que el conjunto de datos no posee.
 
-Las reglas de la competición en Kaggle indican que es posible usar conjuntos de datos auxiliares generados por los usuarios, siempre que estos se hagan públicos y estén disponibles para todos los participantes. Afortunadamente un usuario ha publicado un conjunto de datos que contienen las coordenadas de los rectángulos de todos las imágenes del conjunto de entrenamiento.
+Afortunadamente un usuario ha localizado todos los peces del conjunto de
+entrenamiento en rectángulos y ha publicado un conjunto de datos con las
+coordenadas de los rectángulos que los contienen. Las reglas de la competición
+en \textit{Kaggle} indican que es posible usar conjuntos de datos no oficiales
+generados por otras fuentes siempre que estos se hagan públicos y estén
+disponibles para todos los participantes.
+
+Usando esta información se va a hacer un modelo que para cada imagen genere una
+salida múltiple: la clasificación en una de las ocho categorías y las
+coordenadas del rectángulo que contiene al pez.
 
 El conjunto de datos consiste en un archivo \textit{json} con la siguiente estructura.
 
@@ -565,11 +600,14 @@ El conjunto de datos consiste en un archivo \textit{json} con la siguiente estru
 },
 \end{python}
 
-Cada rectángulo se define mediante su altura (height), anchura (width) y las coordenadas del centro del rectángulo (x, y). Algunas imágenes contienen varios peces, por lo que su clave en el conjunto de datos contienen varios rectángulos.
+Cada una de las imágenes posee una lista de rectángulos, definidos por su
+altura, anchura y las coordenadas del centro. Algunas imágenes poseen varios
+peces, por lo que la lista de rectángulos puede contener más de un elemento.
 
-Si pintamos uno de los rectángulos encima de la imagen a la que corresponde obtenemos la imagen de la figura \ref{box}, que captura correctamente la ubicación del pez.
-
-Para usar esta información en el modelo vamos a usar un modelo de salida múltiple. Este modelo, dada una imagen, devolverá una posible clasificación de la imagen y al mismo tiempo generará las coordenadas de un rectángulo que contenga el pez. El modelo tendrá que usar las mismas características de cada imágen para devolver am
+Para ilustrar estos rectángulos y comprobar que están señalando la localización
+correctemente se ha pintado un rectángulo con las mismas coordenadas en la
+figura \ref{box}. Se puede observar que captura correctamente la localización
+del pez.
 
 
 \begin{figure}
@@ -577,4 +615,122 @@ Para usar esta información en el modelo vamos a usar un modelo de salida múlti
 \label{box}
   \makebox[\textwidth]{\includegraphics[width=0.5\linewidth]{box}}
 \end{figure}
+
+
+\subsection{Arquitectura del modelo}
+
+Insertar aqui la imagen de la arquitectura
+
+Generar la caja que contiene al pez no es un problema de clasificación, por lo
+que no tiene que distinguir entre diferentres tipos de peces, solo identificar
+dónde hay uno. Esto favorecerá a que la red busque características generales de
+peces en vez de características generales de cada una de las categorías. Por
+otro lado, encontrar la clasificación correcta sí que requiere buscar
+características específicas de cada categoría.
+
+Al compartir ambas salidas la misma red hasta la última capa, esta debera
+encontrar un balance entre encontrar características específicas de cada categoría y
+características generales de los peces.
+
+Para la creación de la red vamos a seguir el mismo procedimiento que en la
+entrada múltiple (sección \ref{sec:multi_entry}), solo que en vez de añadir la
+entrada extra en la última capa, dividiremos esta última capa en dos redes
+diferentes.
+
+La primera capa de salida, de localización, no posee una función de activación
+ya que las cuatro salidas representa las cuatro propiedades con las que
+representamos el rectángulo (x, y, altura y anchura) y es necesario que la red
+indique el valor de cada una de esas cuatro propiedades.
+
+La segunda capa es la que hemos usado hasta ahora: ocho salidas representando la
+codificación \textit{onehot} de las ocho categorías.
+\begin{python}
+# Generar la red sin la capa de salida 
+net = build_dense_layers(dropout)
+# Agregar la capa de salida para la localización
+net_bb = Dense(4, name='bb')(net)
+# Agregar la capa de salida para la clasificación
+net_class = Dense(8, activation='softmax', name='class')(net)
+# Generar el modelo usando la entrada + ambas capas de salida
+model = Model([inp], [net_bb, net_class])
+\end{python}
+
+Al entrenar el modelo es necesario indicar de dónde sale el valor a optimizar en
+cada una de las salidas. Para la nueva salida vamos a usar el error cuadrático
+medio (\textit{MSE}, en inglés) entre los valores del conjunto de datos de rectángulos y los valores generados.
+
+\begin{python}
+model.compile(
+    Adam(lr=0.001),
+    loss=['mse', 'categorical_crossentropy'],
+    metrics=['accuracy'],
+    loss_weights=[.001, 1.],
+)
+\end{python}
+
+Ahora hay que proporcionar los ejemplos de las salidas de cada uno de los
+conjuntos de datos para cada capa de salida, así como para el conjunto de
+validación.
+
+\begin{python}
+model.fit(
+    conv_feat,
+    [trn_bbox, trn_labels],
+    batch_size=batch_size,
+    nb_epoch=7,
+    validation_data=(conv_val_feat, [val_bbox, val_labels]),
+)
+\end{python}
+
+La evaluación del modelo sobre el conjunto de test generará una evaluación para
+cada capa de salida. En el cuadro \ref{eval_multi} podemos ver los valores de
+cada una de las capas de salida.
+
+La precisión de la capa de clasificación, que es la que vamos a usar para la
+competición, es la más alta hasta ahora (??). Esto puede deberse a que, como decíamos
+al principio de esta sección, tiene que conseguir características para
+distinguir peces así como caracterísiticas de cada categoría.
+
+\begin{table}[]
+\centering
+\caption{Resultados de la evaluación del modelo de salida múltiple sobre el
+conjunto de test}
+\label{eval_multi}
+\begin{tabular}{rrr}
+                       & \textbf{Pérdida logarítimica} & \textbf{Precisión} \\
+\textbf{Localización}  & 239.54                        & 0.8454             \\
+\textbf{Clasificación} & 0.2403                        & 0.9698            
+\end{tabular}
+\end{table}
+
+\subsection{Visualización de la localización de peces}
+
+Como se veía en la imagen \ref{box} se puede representar la localización anotada
+en el conjunto de datos de cada imagen. De la misma manera podemos visualizar
+los valores de salida de la capa de localización para ver si el modelo es capaz
+de encontrar dónde se encuentra cada pez en la imagen.
+
+En la figura \ref{predicted_boxes_1} podemos ver en rojo la localización original
+y en verde la generada por el modelo. Aunque no es perfecta, captura
+aproximadamente dónde se encuentra el pez. Es curioso notar que en la primera de
+las dos imágenes solo está encontrando las características más visibles del pez.
+La cola, que casi no es distinguible, no se incluye dentro del rectángulo
+generado por el modelo.
+
+En la segunda imagen el modelo ha sido capaz de identificar un pez, pero no el que
+se le había indicado en el conjunto de entrenamiento. El pez que ha localizado
+está más visible y mejor iluminado, por lo que es más fácil de localizar. El pez
+original está parcialmente tapado por la cabeza de un pescador.
+
+\begin{figure}
+  \caption{En rojo, el rectángulo correspondiente a la localización del pez en
+  el conjunto de datos alternativo. En verde, el rectángulo generado por el
+  modelo con salida múltiple.}
+\label{predicted_boxes_1}
+  \makebox[\textwidth]{
+  \includegraphics[width=0.5\linewidth]{predicted_boxes_1}
+  \includegraphics[width=0.5\linewidth]{predicted_boxes_2}
+  }
+\end{figure}
+
 
