@@ -6,15 +6,24 @@
 \section{Metodología}
 \label{sec:metodology}
 
-La puntuación final de la competición será calculada mediante una función de pérdida logarítmica, como vimos en el apartado \ref{sec:envio-y-eval}. Al no tener las categorías del conjunto de datos de test debemos delegar el cálculo de la puntuación en \textit{Kaggle}, ,que permite enviar hasta cinco predicciones al día. Esto es un obstáculo para hacer pequeñas pruebas e iterar rápido sobre los resultados. Por otra parte, el segundo conjunto de test tiene más de 13000 imágenes, que no son rápidas de cargar en memoria ni de pasar por el modelo que se genere. En determinados casos la evaluación del segundo conjunto de test ha tardado más de 6 horas.
+La puntuación final de la competición será calculada mediante una función de
+pérdida logarítmica, como vimos en el apartado \ref{sec:envio-y-eval}. Al no
+tener las categorías del conjunto de datos de test debemos delegar el cálculo de
+la puntuación en \textit{Kaggle}, que permite enviar hasta cinco predicciones al
+día. Esto es un obstáculo para hacer pequeñas pruebas e iterar rápido sobre los
+resultados. Por otra parte, el conjunto de test de la segunda fase tiene más de
+13000 imágenes, que no son rápidas de cargar en memoria ni de pasar por el
+modelo. En determinados casos la evaluación del segundo conjunto de test ha
+tardado más de 6 horas.
 
 La solución a este problema se ha resuelto usando un subconjunto del conjunto de entrenamiento dedicado solo a la evaluación de modelos. Por otra parte, para el entrenamiento es necesario usar un subconjunto de validación, por lo tanto es necesario dividir el conjunto de entrenamiento original en tres subconjuntos: entrenamiento, validación y test.
 
 La partición se ha realizado dejando un \textbf{60 \%} de los datos al conjunto de entrenamiento, un \textbf{20 \%} al conjunto de validación y un \textbf{20 \%} al conjunto de test.
 
+Se puede probar a hacer validación cruzada, que consiste en dividir el conjunto de entrenamiento en n partes, usar n-1 para el entrenamiento y la restante para la validación. Esto se repite n veces, usando cada partición como conjunto de validación. La bondad del modelo será el valor medio de todos los modelos generados. En los algoritmos de redes convolucionales con imágenes no siempre se usa la validación cruzada, ya que son algoritmos muy costosos y puede aumentar mucho el tiempo de entrenamiento.
 
 \subsection{Partición del conjuntos de datos}
-La partición del conjunto de datos es una operación delicada. \textbf{Ya vimos} que uno de los problemas del conjunto de datos era que la cantidad de imágenes para cada clase era muy variada, teniendo algunas clases un número muy bajo de ejemplos. Si seleccionamos aleatoriamente el 40 \% de las imágenes, es posible que no se elijan ejemplos de una o varias de las categorías, con lo que los modelos construidos no las tendrían en cuenta.
+La partición del conjunto de datos es una operación delicada. Ya vimos que uno de los problemas del conjunto de datos era que la cantidad de imágenes para cada clase era muy variada, teniendo algunas clases un número muy bajo de ejemplos. Si seleccionamos aleatoriamente el 40 \% de las imágenes, es posible que no se elijan ejemplos de una o varias de las categorías, con lo que los modelos construidos no las tendrían en cuenta.
 
 La solución adoptada ha sido realizar un muestreo estratificado, seleccionando aleatoriamente el 20\% de los ejemplos de cada clase.
 
@@ -22,8 +31,10 @@ La solución adoptada ha sido realizar un muestreo estratificado, seleccionando 
 
 Para una búsqueda más óptima de parámetros y configuraciones el modelo se evaluará contra el grupo de test generado. Una vez se encuentren determinados modelos especialmente interesantes por tener una puntuación máxima local entre aquellos a los que se compara habrá que enviarlo a \textit{Kaggle} para su evaluación completa.
 
-Enviar el modelo a \textit{Kaggle} se puede hacer sobre una partición más grande del conjunto de entrenamiento, ya que no es necesario usar un conjunto de test para evaluar, solo uno de validación. Esto permite entrenar el modelo sobre el 80\% de los datos consiguiendo, por lo general, resultados más precisos.
+\textit{Kaggle} usa la pérdida logarítmica para medir la bondad de cada modelo (sección 
+\ref{sec:envio-y-eval}). Esta métrica hace que si puntuamos con una probabilidad muy baja la categoría correcta de la imagen, la métrica se vea perjudicada (como se describió en \ref{problemas}).
 
+Un truco para solventar posibles problemas generados a partir de esta métrica es recortar las probabilidades de cada clase, tanto en su valor máximo como en el mínimo. En este caso vamos a hacer que las probabilidades superiores a 0.95 se recorten a 0.95 y las inferiores a 0.15 se recorten a 0.15.
 
 
 \subsection{Software}
@@ -32,20 +43,18 @@ Todos los modelos de redes convolucionales que se van a entrenar en este proyect
 
 
 \section{Idea}
-A la hora de afrontar este problema de clasificación de peces es natural
-seguir una estrategia separada en dos pasos: primero buscar si
-existe un pez en la imágen y luego intentar clasificarlo en una de las
-categorías existentes.
 
-Para buscar un pez en una imágen es necesario encontrar una serie de
-características que puedan ser identificadas con algún pez. La idea de
-la solución parte de esta base. Para clasificar una imagen,
-primero es necesario encontrar el contenido relevante para ser usado
-en la clasificación.
+Los humanos somos expertos identificando cosas visualmente. Esto se debe, en
+parte, a que nos llevamos la mayor parte de nuestra vida resolviendo problemas
+de identificación visual y somos muy eficientes generalizando las
+características de una imagen.
 
-Como ya se comentó al hablar de las redes convolucionales (capítulo \ref{sec:conv-net-arch}),
-las arquitecturas encontradas en problemas similares \parencite{krizhevsky2012imagenet}
-permiten separar con claridad estas dos etapas mediante el uso de redes convolucionales (CONV) y capas densas (FC).
+Si queremos aplicar la misma idea a este problema necesitamos que el modelo
+aprenda a generalizar características de elementos de una imagen.  Como ya se
+comentó al hablar de las redes convolucionales (capítulo
+\ref{sec:conv-net-arch}), las arquitecturas encontradas en problemas similares
+\parencite{krizhevsky2012imagenet} permiten aprovechar entrenamientos
+anteriores mediante el uso de redes convolucionales (CONV) y capas densas (FC).
 
 \section{Arquitectura}
 
@@ -72,6 +81,7 @@ Intuitivamente podemos pensar que la salida cada uno de estos filtros representa
 Hay que tener en cuenta que este modelo convolucional no ha sido entrenado con el conjunto de entrenamiento del problema, sino con el conjunto de entrenamiento de \parencite{imagenet}. Por lo tanto, esta red convolucional va a ser usada para transformar cada imagen del conjunto de entrenamiento del problema a un conjunto de características.
 
 \subsection{Modelo preentrenado}
+\label{sec:vgg}
 
 La arquitectura del artículo original \parencite{krizhevsky2012imagenet} usa capas convolucionales donde alterna filtros de $11\times11$, $5\times5$ y $3\times3$, el cual parece una buena elección para usar como modelo convolucional preentrenado. Sin embargo, la aplicación de este trabajo es una competición internacional donde se usarán soluciones \textit{state of the art}. El modelo de la figura \ref{general-architecture} representa el ganador de la edición 2012 de la competición ILSVRC, por lo que resulta conveniente analizar los modelos ganadores de años posteriores.
 
@@ -96,7 +106,14 @@ Al modificar la estructura de la última capa estamos destruyendo pesos y hacien
 
 Al dividir la red en dos subredes diferentes hay que tener en cuenta que la segunda, la red densa, no recibe como entrada las imágenes, sino la salida de la primera red convolucional, con todas las transformaciones que esta produce. Es necesario entonces aplicar la red convolucional a todo el conjunto de datos para crear un nuevo conjunto de datos con el que reentrenar la red densa.
 
-Esta técnica de ajustar los parámetros de un modelo ya conocido para adaptarlo a un nuevo conjunto de datos se conoce como ajuste fino (\textit{fine-tuning}).
+Esta técnica de ajustar los parámetros de un modelo ya conocido para adaptarlo a un nuevo conjunto de datos se conoce como ajuste fino (\textit{fine-tuning}). En la figura \ref{basic_architecture} se puede ver un resumen de las diferentes etapas por los que pasa la red.
+
+\begin{figure}
+  \caption{Estructura del modelo final. Como recibe como entrada imágenes de 244 píxeles, pasa por las diferentes redes y devuelve el vector de ocho categorías.}
+\label{basic_architecture}
+  \makebox[\textwidth]{\includegraphics[width=.7\linewidth]{basic_architecture}}
+\end{figure}
+
 
 Usando el conjunto de datos definido en el capítulo \ref{sec:metodology}, con la separación 60 \%, 20 \% y 20 \% para los conjuntos de entrenamiento, validación y test se ha entrenado la red densa.
 
@@ -156,12 +173,15 @@ dense_model.fit(
 # Evaluar el modelo sobre el conjunto de test
 dense_model.evaluate(test_feat, test_labels)
 # Log loss, accuracy
->>> [2.38985158622892523, 0.66099843993759748]
+>>> [1.90571456890184755, 0.66099843993759748]
 \end{python}
 
-La puntuación total de \textit{kaggle} para este conjunto de test sería $2.389$. Esto es sobre un conjunto de test muy pequeño, solo el 20 \% del conjunto de entrenamiento. Como se ya ha dicho anteriormente, habría que subir las predicciones del conjunto de test final a \textit{kaggle} para verificar la puntuación del modelo, pero debido a las restricciones comentadas mediremos de esta forma los modelos generados.
+La puntuación total para este conjunto de test sería $1.906$. Esto es sobre un conjunto de test muy pequeño, solo el 20 \% del conjunto de entrenamiento. 
 
 El segundo número que devuelve la función $evaluate$ es la precisión ($accuracy$) del modelo. Al ser el modelo un modelo de clasificación, el usar $"accuracy"$ como métrica al compilar el modelo hace devuelva el porcentaje de veces que la clase con la probabilidad máxima se corresponde con la clase etiquetada en el conjunto de datos. En este caso el modelo ha clasificado correctamente el 66 \% de las imágenes, un número muy aceptable teniendo en cuenta que solo se ha tocado la capa final de un modelo ajeno.
+
+Al subir la predicción del conjunto de test a \textit{kaggle} se obtiene una puntuación de \textbf{2.632} en la clasificación pública, mediante la pérdida logarítmica. Hay que recordar que esta puntuación se calcula usando un subconjunto del conjunto de test, así que la puntuación de este modelo puede cambiar en la segunda fase.
+
 
 \section{Modelo completamente conectado}
 
@@ -169,7 +189,18 @@ La idea original que se comentaba al principio consistía en separar el problema
 
 El modelo original de VGG usa dos capas $densas$ de 4096 neuronas para clasificar entre mil clases diferentes. Ya que este problema tiene solo ocho clases diferentes probablemente no sea necesario usar capas tan grandes, por lo que se procede a probar la misma estructura original pero con capas cuatro veces más pequeñas que las originales.
 
-La estructura, por lo tanto, quedaría de la misma manera pero usando dos capas densas de 512 neuronas cada una y una capa densa final de 8. Para no tener que estar modificando el modelo original cada vez que haga falta es mucho más sencillo crear un modelo nuevo con $Keras$ y añadir todas las capas necesarias.
+La estructura, por lo tanto, quedaría de la misma manera pero usando dos capas
+densas de 512 neuronas cada una y una capa densa final de 8 (figura \ref{standard_arch}). Para no tener que
+estar modificando el modelo original cada vez que haga falta es mucho más
+sencillo crear un modelo nuevo con $Keras$ y añadir todas las capas necesarias.
+
+\begin{figure}
+  \caption{}
+\label{standard_arch}
+  \makebox[\textwidth]{\includegraphics[width=.9\linewidth]{standard_arch}}
+\end{figure}
+
+
 
 \begin{python}
 def list_dense_layers():
@@ -194,7 +225,10 @@ dense_model.evaluate(test_feat, test_labels)
 >>> [1.27161316430079874, 0.73067862714508579]
 \end{python}
 
-Los resultados obtenidos son ligeramente mejores que los anteriores, sin embargo no es aquí donde está toda la mejora. El entrenamiento de este modelo ha sido un 80\% más rápido que el anterior (19.5 segundos el primero, 3.9 segundos el último). Esto no solo ha permitido entrenar la red durante más tiempo, sino que en el futuro hará posible entrenar sobre mayores cantidades de datos sin aumentar el tiempo de entrenamiento.
+Los resultados obtenidos son ligeramente mejores que los anteriores, sin embargo no es aquí donde está toda la mejora. El entrenamiento de este modelo ha sido un 80\% más rápido que el anterior (19.5 segundos por iteración en el primero, 3.9 segundos en este último). Esto no solo ha permitido entrenar la red durante más tiempo, sino que en el futuro hará posible entrenar sobre mayores cantidades de datos sin aumentar el tiempo de entrenamiento.
+
+La puntuación en la tabla pública de \textit{Kaggle} para este modelo ha sido
+de \textbf{2.381}.
 
 \subsection{Mejorar el modelo}
 
@@ -202,14 +236,17 @@ La salida de Keras al entrenar el modelo ofrece información de lo que está suc
 
 \begin{python}
 Epoch 5/7
-loss: 1.406 - acc: 0.621 - val_loss: 2.0197 - val_acc: 1.861
+loss: 0.354 - acc: 0.992 - val_loss: 1.091 - val_acc: 0.872
 Epoch 6/7
-loss: 0.992 - acc: 0.674 - val_loss: 1.4356 - val_acc: 1.001
+loss: 0.253 - acc: 0.996 - val_loss: 0.995- val_acc: 0.881
 Epoch 7/7
-loss: 0.872 - acc: 0.761 - val_loss: 1.2772 - val_acc: 0.695
+loss: 0.193 - acc: 0.997 - val_loss: 0.987- val_acc: 0.913
 \end{python}
 
-Los valores mostrados indican los resultados de la evaluación del modelo sobre el conjunto de entrenamiento y el de validación, respectivamente. Esto es mostrado para cada uno de los pasos. Se puede observar que el modelo funciona mucho mejor en el conjunto de entrenamiento que en el de validación.
+En cada una de las iteraciones del entrenamiento, \textit{Keras} muestra los
+valores de aplicar el modelo actual a los ejemplos de entrenamiento y
+validación. Se puede observar que el modelo funciona mucho mejor en el conjunto
+de entrenamiento que en el de validación.
 
 Cuando un modelo tiene demasiados parámetros y ha sido entrenado durante demasiado tiempo aprende a clasificar los ejemplos con los que entrena usando información específica de cada uno de ellos en vez de generalizar. Esto se conoce como \textbf{sobreajuste} (\textit{overfitting}).
 
@@ -295,7 +332,7 @@ dense_model = keras.models.Sequential(list_dense_layers(0.45))
 
 Esto no es suficiente. A diferencia del \textit{dropout}, la normalización por lotes sí que es capaz de mejorar la red convolucional del modelo preentrenado. Gracias a la popularidad de esta técnica y de los modelos preentrenados que se usan en este trabajo, ya existen entrenamientos del modelo VGG original usando normalización por lotes, ahorrando la necesidad de entrenar una red tan grande. Una descripción de esto entrenamientos se puede encontrar en \parencite{pretrained_with_bn}.
 
-En el caso de este trabajo se ha adaptado bajo la clase $Vgg16BN$. Al cambiar la red convolucional original hay que volver a transformar el conjunto de datos que se usaba para obtener los resultados de aplicar los filtros actualizados sobre las imágenes de entrada.
+En el caso de este trabajo se ha adaptado bajo la clase $Vgg16BN$. (TODO cita a howar) Al cambiar la red convolucional original hay que volver a transformar el conjunto de datos que se usaba para obtener los resultados de aplicar los filtros actualizados sobre las imágenes de entrada.
 
 \begin{python}
 # Carga del modelo VGG16 con normalizacion por lotes
@@ -320,12 +357,13 @@ dense_model.compile(...)
 dense_model.fit(...)
 # Evaluar el modelo sobre el conjunto de test
 dense_model.evaluate(test_feat, test_labels)
->>> [0.16719577019912478, 0.9611234577100389]
+>>> [0.45127591543710, 0.96109451984491]
 \end{python}
 
 Como se puede apreciar, los dos últimos cambios han supuesto una mejora considerable sobre el modelo anterior, clasificando correctamente el 96\% de los ejemplos del conjunto de test.
 
-TODO: poner aqui la clasificacion de kaggle de este modelo, que es uno de los presentados.
+La puntuación en la tabla pública de \textit{Kaggle} para este modelo ha sido
+de \textbf{1.017}.
 
 
 \subsection{Aumento de datos}
@@ -336,7 +374,7 @@ Uno de los métodos que se usan para tratar de reducir el sobreajuste del modelo
 
 En el caso de nuestro problema esta técnica es especialmente interesante, ya que las cámaras de los barcos están fijas apuntando siempre a la misma zona. En las fotos sobre los peces capturados, estos siempre suelen estar con la cabeza apuntando en dirección contraria al agua. Ello hace que la red reconozca más fácilmente peces dispuestos en una determinada dirección pero costándole más trabajo para el resto de direcciones. Si las redes convolucionales ayudaban a detectar determinados patrones en cualquier punto de la imagen, el aumento de datos hace lo propio de otras variantes como la rotación, el tamaño o el filtro de color dado por el ambiente.
 
-Un ejemplo de aumento de datos se muestra en la figura \ref{aug-original}, que contiene cuatro imágenes obtenidas al reescalar de distintas maneras la imagen original de la figura \ref{aug-original}.
+Un ejemplo de aumento de datos se muestra en la figura \ref{augmentations}, que contiene cuatro imágenes obtenidas al reescalar de distintas maneras la imagen original de la figura \ref{aug-original}.
 
 \begin{figure}
     \caption{Imagen del conjunto de datos}
@@ -347,7 +385,10 @@ Un ejemplo de aumento de datos se muestra en la figura \ref{aug-original}, que c
 \begin{figure}
     \caption{Cuatro aumentos diferentes de la imagen, reescalada a $224\times224$ píxeles}
 \label{augmentations}
-  \makebox[\textwidth]{\includegraphics[width=\linewidth]{augmentations}}
+  \makebox[\textwidth]{\includegraphics[width=.2\linewidth]{au1}}
+  \makebox[\textwidth]{\includegraphics[width=.2\linewidth]{au3}}
+  \makebox[\textwidth]{\includegraphics[width=.2\linewidth]{au2}}
+  \makebox[\textwidth]{\includegraphics[width=.2\linewidth]{au4}}
 \end{figure}
 
 Para trabajar con aumentos de datos, \textit{Keras} proporciona una serie de opciones de transformación dentro de la utilidad para importar conjuntos de datos. Al definir dichas opciones, como por ejemplo rotación, zoom o volteo horizontal, Keras generará nuevas imágenes a la vez que carga el conjunto de datos en memoria.
@@ -389,13 +430,15 @@ Epoch 7/7
 loss: 0.0708 - acc: 0.9860 - val_loss: 0.1139 - val_acc: 0.9520
 
 dense_model.evaluate(test_feat, test_labels)
->>> [0.15222558558899649, 0.96723868954758185]
+>>> [0.31255581648, 0.96723868954]
 \end{python}
 
-El modelo, que ahora ha predicho correctamente casi un 97\% de las imágenes del conjunto de test, ha aumentado ligeramente la puntuación de pérdida logarítmica. Hay que tener en cuenta que a medida que esta puntuación tiende a cero, es más difícil disminuirla, ya que corresponde cada vez más a un modelo casi perfecto.
+El modelo, que ahora ha predicho correctamente casi un 97\% de las imágenes del conjunto de test, ha disminuido ligeramente la puntuación de pérdida logarítmica. Hay que tener en cuenta que a medida que esta puntuación tiende a cero, es más difícil disminuirla, ya que corresponde cada vez más a un modelo casi perfecto.
 
 Cuando hablamos de un modelo casi perfecto, nos referimos respecto al conjunto de test elegido. En este caso, debido al pequeño tamaño del conjunto de test, la perfección del modelo estará lejos de la perfección del modelo real que va a ser probado en el reto.
 
+La puntuación en la tabla pública de \textit{Kaggle} para este modelo ha sido
+de \textbf{0.9364}, el mejor hasta ahora.
 
 \section{Modelo convolucional}
 
@@ -433,14 +476,23 @@ Las imágenes resultantes de estos filtros se transforman a una sola entrada med
 
 De nuevo habrá que transformar el conjunto de datos por medio de la red convolucional preentrenada, ya que se va a usar un tamaño de imagen de $360\times640$.
 
+\begin{figure}
+    \caption{Arquitectura de la red completamente convolucional}
+\label{fcn_arch}
+  \makebox[\textwidth]{\includegraphics[width=0.7\linewidth]{fcn_arch}}
+\end{figure}
+
 Aunque, como se ha comentado, la red convolucional acepta un aumento del tamaño de la imagen sin aumentar exponencialmente el tiempo de entrenamiento, el entrenamiento de una red convolucional es mucho más costoso que el de una red clásica. Esto se debe a que hay que actualizar $n\timesn$ pesos por cada píxel de cada imagen. En este caso el entrenamiento de la red completamente convolucional ha tardado 24 veces más que el entrenamiento de la red densa del capítulo anterior.
 
 \begin{python}
 conv_model.evaluate(test_feat, test_labels)
->>> [0.14251796898005481, 0.973238231345685]
+>>> [0.243715549991, 0.969645081488]
 \end{python}
 
-Al evaluar el modelo se ve que consigue una pequeña mejora respecto al modelo denso. Pero el aumento de puntuación no es la única ventaja de este modelo.
+Al evaluar el modelo se ve que consigue una pequeña mejora respecto al modelo
+denso. La puntuación en la tabla pública de \textit{Kaggle} para este modelo ha
+sido de \textbf{0.8109}.
+
 
 \subsection{Visualización del modelo}
 
@@ -485,18 +537,50 @@ Esto pertime tomar ciertas decisiones sobre el entrenamiento del modelo. Por eje
 \section{Modelo con entrada múltiple}
 \label{sec:multi_entry}
 
-Un examen detallado del conjunto de datos de entrada nos permite detectar determinadas propiedades de las imágenes cuyo uso podría permitir una mejora de los modelos. Por ejemplo, las imágenes están tomadas en diferentes barcos, con diferentes modelos de cámaras. No todas las cámaras generan imágenes del mismo tamaño, por lo que se podría averiguar el barco del que se ha tomado la fotografía por el tamaño de la imagen.
+Como se vió en el análisis del conjunto de datos (sección \ref{dataset}), hay otras propiedades de las imágenes cuyo uso podría permitir una mejora de los modelos. Por ejemplo, las imágenes están tomadas en diferentes barcos, con diferentes modelos de cámaras. No todas las cámaras generan imágenes del mismo tamaño, por lo que se podría averiguar el barco del que se ha tomado la fotografía por el tamaño de la imagen.
 
 Ya que cada barco suele pescar diferentes tipos de peces con mayor o menor probabilidad, el conocer el tipo de barco puede ser aprovechado por el modelo para balancear las posibilidades de cada categoría dependiendo del tipo de pesca que suela llevar.
 
-La idea no es hacer todo esto a mano, sino entrenar un modelo que tenga en cuenta tanto las imágenes como otra información válida.
+La idea no es hacer todo esto a mano, sino entrenar un modelo que tenga en
+cuenta tanto las imágenes como otra información válida, en este caso, cúal es
+el tamaño de la imagen. En el conjunto de datos hay diez tamaños diferentes de
+imágenes, las cuales se codificarán en \textit{onehot} para facilitar el
+entrenamiento.  Los diferentes tamaños de las imágenes son los indicados en el
+cuadro \ref{image_sizes}.
 
-En este caso se va a elegir el modelo denso, con la diferencia que la última capa tendrá dos entradas: la salida de las capas ocultas de la red neuronal y el tamaño de la imagen, codificado en \textit{onehot}.
+\begin{table}[]
+\centering
+\caption{Ocurrencia de los diferentes tamaños de imagen}
+\label{image_sizes}
+\begin{tabular}{rr}
+\textbf{Tamaño de la imagen} & \textbf{Cantidad de imágenes} \\
+1192 \times 670              & 169                           \\
+1276 \times 718              & 192                        \\
+1244 \times 700              & 23                            \\
+1280 \times 720              & 1880                          \\
+1280 \times 750              & 520                           \\
+1280 \times 924              & 51                            \\
+1280 \times 974              & 344                           \\
+1334 \times 750              & 28                            \\
+1518 \times 854              & 37                            \\
+1732 \times 974              & 33                           
+\end{tabular}
+\end{table}
 
-Para este modelo y posteriores modificaciones vamos a definir una función
-llamada \textit{build\_dense\_layers} que genere la red posterior a la red
-convolucional sin la capa de clasificación final. Es decir, tres capas densas de
-512 entradas, \textit{dropout}, y normalización por lotes.
+Para la arquitectura del modelo vamos a usar la red densa, con la diferencia de
+que la última capa tendrá dos entradas: la salida de las capas ocultas de la
+red neuronal y la clasificación del tamaño de la imagen, codificado en
+\textit{onehot}, como se muestra en la figura \ref{multi_input_arch}.
+
+\begin{figure}
+    \caption{Arquitectura del modelo con entrada múltiple}
+\label{multi_input_arch}
+  \makebox[\textwidth]{\includegraphics[width=\linewidth]{multi_input_arch}}
+\end{figure}
+
+La estructura del código es ligeramente diferente, ya que ahora vamos a generar
+todas las capas que teníamos anteriormente menos la última en una misma
+función:
 
 \begin{python}
 def build_dense_layers(dropout=0.5):
@@ -543,14 +627,24 @@ Tras construir el modelo con las entradas múltiples y entrenarlo sobre los dos 
 
 \begin{python}
 dense_model.evaluate(test_feat, test_labels)
->>> [0.1725, 0.9413]
+>>> [0.373333961543, 0.941351055711]
 \end{python}
 
 El modelo ha sacado una evaluación peor que modelos anteriores, incluso usando un modelo que ya se conocía con una evaluación superior.
 
-Aunque la idea es buena, lo que está haciendo por debajo es clasificar los diferentes barcos en base a los tamaños de sus imágenes. Debido a la amplia diferencia de las imágenes de los diferentes tipos de barcos, ya sea por los colores, iluminación, objetos, etc, el modelo denso probablemente ya esté teniendo en cuenta de qué barco es cada imagen. Por lo tanto lo único que va a añadir el introducir estos datos es complejidad del modelo, haciendo más difícil converger a un modelo bueno.
+Aunque la idea es buena, lo que está haciendo por debajo es clasificar los
+diferentes barcos en base a los tamaños de sus imágenes. Debido a la amplia
+diferencia de las imágenes de los diferentes tipos de barcos, ya sea por los
+colores, iluminación, objetos, etc, el anterior modelo denso probablemente ya
+esté teniendo en cuenta de qué barco es cada imagen. Por lo tanto lo único que
+va a añadir el introducir estos datos es complejidad del modelo, haciendo más
+difícil converger a una buena solución.
 
-\subsubsection{Fuga de datos}
+El envío de este modelo ha obtenido una puntuación de\textbf{1.0466} en la tabla pública de \textit{Kaggle}, empeorando el anterior envío.
+
+
+
+\subsection{Fuga de datos}
 
 Esta idea de usar datos diferentes del conjunto de datos para clasificar es algo muy usado en las competiciones de modelos predictivos. No solo funciona el tamaño de la foto, sino a veces las fotos tienen datos adicionales, como información GPS, hora de creación o modelo de cámara.
 
@@ -619,14 +713,12 @@ del pez.
 
 \subsection{Arquitectura del modelo}
 
-Insertar aqui la imagen de la arquitectura
-
 Generar la caja que contiene al pez no es un problema de clasificación, por lo
-que no tiene que distinguir entre diferentres tipos de peces, solo identificar
-dónde hay uno. Esto favorecerá a que la red busque características generales de
-peces en vez de características generales de cada una de las categorías. Por
-otro lado, encontrar la clasificación correcta sí que requiere buscar
-características específicas de cada categoría.
+que no tiene que distinguir entre diferentres tipos de peces, solo tiene que
+identificar dónde hay uno. Esto favorecerá a que la red busque características
+generales de peces en vez de características generales de cada una de las
+categorías. Por otro lado, encontrar la clasificación correcta sí que requiere
+buscar características específicas de cada categoría.
 
 Al compartir ambas salidas la misma red hasta la última capa, esta debera
 encontrar un balance entre encontrar características específicas de cada categoría y
@@ -635,7 +727,14 @@ características generales de los peces.
 Para la creación de la red vamos a seguir el mismo procedimiento que en la
 entrada múltiple (sección \ref{sec:multi_entry}), solo que en vez de añadir la
 entrada extra en la última capa, dividiremos esta última capa en dos redes
-diferentes.
+diferentes, como se muestra en la figura \ref{multi_output_arch}.
+
+\begin{figure}
+  \caption{Arquitectura del modelo denso con salida múltiple}
+\label{multi_output_arch}
+  \makebox[\textwidth]{\includegraphics[width=\linewidth]{multi_output_arch}}
+\end{figure}
+
 
 La primera capa de salida, de localización, no posee una función de activación
 ya que las cuatro salidas representa las cuatro propiedades con las que
@@ -655,9 +754,13 @@ net_class = Dense(8, activation='softmax', name='class')(net)
 model = Model([inp], [net_bb, net_class])
 \end{python}
 
-Al entrenar el modelo es necesario indicar de dónde sale el valor a optimizar en
-cada una de las salidas. Para la nueva salida vamos a usar el error cuadrático
-medio (\textit{MSE}, en inglés) entre los valores del conjunto de datos de rectángulos y los valores generados.
+Al entrenar el modelo es necesario indicar de dónde sale el valor a optimizar
+en cada una de las salidas. Para la nueva salida vamos a usar el error
+cuadrático medio (\textit{MSE}, en inglés) entre los valores del conjunto de
+datos de rectángulos y los valores generados. El \textit{MSE} consiste en la
+media del cuadrado de la diferencia entre los valores esperados y los valores
+de la salida. Esto penalizará mucho más los valores lejanos a la salida
+esperada que los pequeños errores.
 
 \begin{python}
 model.compile(
@@ -686,11 +789,6 @@ La evaluación del modelo sobre el conjunto de test generará una evaluación pa
 cada capa de salida. En el cuadro \ref{eval_multi} podemos ver los valores de
 cada una de las capas de salida.
 
-La precisión de la capa de clasificación, que es la que vamos a usar para la
-competición, es la más alta hasta ahora (??). Esto puede deberse a que, como decíamos
-al principio de esta sección, tiene que conseguir características para
-distinguir peces así como caracterísiticas de cada categoría.
-
 \begin{table}[]
 \centering
 \caption{Resultados de la evaluación del modelo de salida múltiple sobre el
@@ -702,6 +800,14 @@ conjunto de test}
 \textbf{Clasificación} & 0.2403                        & 0.9698            
 \end{tabular}
 \end{table}
+
+La precisión de la capa de clasificación, que es la que vamos a usar para la
+competición, es la más alta hasta ahora. Esto puede deberse a que, como
+decíamos al principio de esta sección, tiene que conseguir características para
+distinguir peces así como caracterísiticas de cada categoría.
+
+La puntuación en la tabla pública de \textit{Kaggle} para este modelo ha sido
+de \textbf{0.8675}, siendo el segundo mejor modelo de los entrenados hasta ahora.
 
 \subsection{Visualización de la localización de peces}
 
@@ -734,3 +840,142 @@ original está parcialmente tapado por la cabeza de un pescador.
 \end{figure}
 
 
+\section{Modelos \textit{ensemble}}
+
+En competiciones de modelos predictivos es habitual que la mejor puntuación
+no la obtenga un único modelo, sino un modelo generado a partir de varios. Este
+tipo de modelos se conocen como \textit{ensemble models} (modelos de conjunto).
+
+Para generar estos modelos no es necesario reentrenar los modelos disponibles, sino
+trabajar con las salidas de estos. Primero generamos las predicciones de cada
+modelo que queremos unir. Luego generamos una predicción del modelo
+\textit{ensemble} uniendo los valores de las predicciones usando un sistema de
+votación o una media aritmética ponderada. Hay otros métodos de generar modelos
+\textit{ensemble} más sofisticados, pero aquí se van a tratar los más simples:
+
+\begin{itemize}
+    \item{\textbf{Votación:} La salida de cada modelo se entiende como una
+            votación de a qué categoría debería pertenecer dicha entrada. La
+            salida del modelo final es la elección ganadora de esa votación. Por
+            ejemplo, si el modelo 1 ha elegido ALB y los modelos 2 y 3 han
+        elegido YFT, la salida del modelo \textit{ensemble} será YFT.}
+    \item{\textbf{Media ponderada:} En el caso de que la salida sean
+            probabilidades de cada clase se puede  usar una media ponderada
+            entre los valores de los modelos. La ponderación de la media permite
+            dar preferencia al modelo con más confianza.
+            
+            En el cuadro \ref{ensemble_sample} podemos ver un ejemplo de como
+        sería la salida de un modelo \textit{ensemble} ejemplo usando una media
+    aritmética entre tres modelos diferentes.}
+
+Debido a que los modelos presentados generan un vector de probabilidades para
+cada categoría, los modelos \textit{ensemble} generados usarán la media
+ponderada.
+
+\begin{table}[]
+\centering
+\caption{Predicciones de diferentes modelos para una imagen, unidas en un modelo
+final mediante una media aritmética}
+\label{ensemble_sample}
+\begin{tabular}{rllllllll}
+Modelo              & ALB   & BET   & DOL   & LAG   & NoF   & OTHER & SHARK  & YFT  \\
+\hline
+Salida múltiple     & 0.010 & 0.052 & 0.030 & 0.001 & 0.123 & 0.079 & 0.046 & 0.875\\
+Red base            & 0.020 & 0.001 & 0.030 & 0.002 & 0.123 & 0.079 & 0.046 & 0.844\\
+Red convolucional   & 0.030 & 0.301 & 0.029 & 0.001 & 0.123 & 0.079 & 0.046 & 0.502\\
+\hline
+Ensemble            & 0.020 & 0.118 & 0.030 & 0.001 & 0.123 & 0.079 & 0.046 & 0.740
+\end{tabular}
+\end{table}
+
+Usar la pérdida logarítmica como métrica hace que se castigue mucho las bajas
+probabilidades en las categorías correctas. Usar la media para estos modelos
+puede ayudar a evitar este comportamiento, ya que solo tendrán probabilidades
+cercanas a cero aquellas categorías que sean casi cero en todos los modelos.
+
+Un ejemplo puede verse en la categoría LAG del cuadro \ref{ensemble_sample}.
+Todas los modelos predicen una baja puntuación para esa categoría, por lo que la
+puntuación final también es muy baja. Sin embargo en la categoría BET existe un
+modelo que le da una puntuación media, haciendo que esta se aleje de cero. En
+cuanto uno de los modelos no está de acuerdo en que la puntuación sea cero, esta
+se aleja.
+
+\subsection{Resultados}
+
+Se han presentado dos modelos diferentes usando esta técnica. Ambos modelos
+están compuestos de tres modelos anteriores:
+
+\begin{itemize}
+    \item{Modelo con clasificador denso, dropout, normalización por lotes y
+        aumento de datos.}
+    \item{Modelo completo convolucional}
+    \item{Modelo con salida múltiple}
+\end{itemize}
+
+Estos tres modelos son los que mejores resultados obvtuvieron en la
+clasificación, así que se usarán para generar dos modelos. El primero usará la
+media aritmética de la salida mientras que el segundo será ponderado de la
+siguiente manera: 25 \% para el clasificador denso, 25 \% para el modelo con
+salida múltiple y 50 \% para el modelo completo convolucional.
+
+Al evaluar estos modelos en \textit{Kaggle}, los resultados de la tabla pública
+son los siguientes
+
+\begin{itemize}
+    \item{Media aritmética sobre los tres modelos: \textbf{0.9175}
+    \item{Media ponderada favoreciendo el modelo completo convolucional: \textbf{0.8975}
+\end{itemize}
+
+Las puntuaciones de ensemble, que tradicionalmente suelen conseguir las mejores posiciones en las competiciones de kaggle, no han conseguido ser las mejores.
+
+\section{Modelos finales presentados}
+
+En los cuadros \ref{model_id} y \ref{final_scores} hay un resumen de los
+modelos presentados con sus puntuaciones.
+
+Las reglas de la competición establecen que solo es posible puntuar dos modelos en la tabla de puntuaciones privada y solo es posible usar un modelo para la segunda fase.
+
+El mejor modelo según las puntuaciones públicas de la primera fase es el que usa un clasificador convolucional en las últimas capas, seguido del que usa una salida múltiple para intentar clasificar los peces. Hay que recordar que estas puntuaciones se calculan usando un subconjunto del conjunto de test, por lo que puede cambiar cuando se publique la tabla privada.
+
+Tradicionalmente los modelos ensemble consiguen mejores puntuaciones en las competiciones de \textit{Kaggle}, por lo que se ha decidido enviar un modelo ensemble (el tercero en mejor puntuación) y el convolucional completo.
+
+Al publicarse las puntuaciones privadas, vemos en el cuadro \ref{final_scores} que el modelo convolucional consigue mejor puntuación, así que es seleccionado como el modelo final a enviar.
+
+La puntuación final de este modelo es de \textbf{0.907} en la tabla pública y \textbf{1.998} en la privada, consiguiendo una posición 210 de 2293 participantes y una medalla de bronce (por clasificar dentro del mejor 10 \% de los participantes).
+
+\begin{table}[]
+\centering
+\caption{Identificadores de los modelos}
+\label{model_id}
+\begin{tabular}{rl}
+\textbf{Id} & \textbf{Modelo}                                                       \\ \hline
+vgg         & VGG16 con ajuste fino                                                 \\
+v-512       & VGG16 con capas de 512 salidas                                        \\
+v-norm      & VGG16 con normalización por lotes (+ 512 s, \textit{dropout})       \\
+v-aug       & VGG16 con aumento de datos (+ 512 s, \textit{dropout}, norm.)       \\
+v-fcn       & VGG16 con red convolucional (+ norm.)                                 \\
+m-in        & VGG16 con entrada múltiple (+ 512 s, \textit{dropout}, norm, datos) \\
+m-out       & VGG16 con salida múltiple (+ 512 s, \textit{dropout}, norm, datos)  \\
+e-arit      & \textit{Ensemble} con media aritmética                              \\
+e-pond      & \textit{Ensemble} con media aritmética ponderada                   
+\end{tabular}
+\end{table}
+
+\begin{table}[]
+\centering
+\caption{Identificadores de los modelos}
+\label{final_scores}
+\begin{tabular}{r|lllll}
+\textbf{Id}           & \textbf{Local}        & 1ª fase                      &                              & 2ª fase                      &                              \\ \cline{3-6} 
+\multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{Pública} & \multicolumn{1}{l|}{Privada} & \multicolumn{1}{l|}{Pública} & \multicolumn{1}{l|}{Privada} \\ \hline
+vgg                   & 2.383                 & 2.632                        & -                            & -                            & -                            \\
+v-512                 & 1.272                 & 2.381                        & -                            & -                            & -                            \\
+v-norm                & 0.451                 & 1.017                        & -                            & -                            & -                            \\
+da-aug                & 0.312                 & 0.936                        & -                            & -                            & -                            \\
+fcn                   & 0.243                 & 0.811                        & 0.770                        & 0.907                        & 1.998                        \\
+m-in                  & 0.373                 & 1.047                        & -                            & -                            & -                            \\
+m-out                 & 0.240                 & 0.867                        & -                            & -                            & -                            \\
+e-arit                & -                     & 0.917                        & -                            & -                            & -                            \\
+e-pond                & -                     & 0.897                        & 0.841                        & -                            & -                           
+\end{tabular}
+\end{table}
