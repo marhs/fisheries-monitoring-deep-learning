@@ -64,7 +64,7 @@ presentar:
 A principios de 2017 \textit{Kaggle} fué comprado por \textit{Google}, aunque por ahora sigue siendo una
 plataforma independiente funcionando bajo su propio nombre.
 
-\section{\textit{ The Nature Conservancy Fisheries Monitoring }}
+\section{\textit{The Nature Conservancy Fisheries Monitoring }}
 
 En el océano pacífico, donde se captura más del 60\% del atún del mundo, tienen lugar prácticas de pesca irregular que amenazan a los ecosistemas marinos y a la estabilidad de la pesca mundial. \textit{The Nature Conservancy} es una asociación que trabaja con organizaciones locales y globales para preservar las especies marinas de cara al futuro.
 
@@ -111,7 +111,7 @@ La competición proporciona tres ficheros con los que trabajar:
 \subsection{Envío de la solución y evaluación}
 \label{sec:envio-y-eval}
 
-Para el envío de la solución hace falta clasificar las 1000 imágenes del conjunto de evaluación, indicando la probabilidad de que caiga en cada una de las ocho categorías diferentes. En la tabla \ref{submission-sample} se muestra un ejemplo de las primeras filas del archivo CSV a enviar.
+Para el envío de la solución hace falta clasificar las 1000 imágenes del conjunto de evaluación, indicando la probabilidad de que caiga en cada una de las ocho categorías diferentes. En la tabla \ref{submission-sample} se muestra un ejemplo de una fila del archivo CSV a enviar.
 
 \begin{table}[]
 \centering
@@ -120,8 +120,6 @@ Para el envío de la solución hace falta clasificar las 1000 imágenes del conj
 \begin{tabular}{lllllllll}
 image          & ALB   & BET   & DOL   & LAG    & NoF   & OTHER & SHARK  & YFT  \\
 img\_00005.jpg & 0.455 & 0.052 & 0.030 & 0.0173 & 0.123 & 0.079 & 0.046 & 0.194\\
-img\_00007.jpg & 0.455 & 0.052 & 0.030 & 0.0173 & 0.123 & 0.079 & 0.046 & 0.194\\
-img\_00009.jpg & 0.455 & 0.052 & 0.030 & 0.0173 & 0.123 & 0.079 & 0.046 & 0.194
 \end{tabular}
 \end{table}
 
@@ -130,7 +128,10 @@ Los resultados enviados se evalúan mediante una función de pérdida logarítmi
   logloss =
   - \frac{1}{N} \sum_{i=1}^N \sum_{j=1}^M y_{ij} \log \, p_{ij}
 \]
- siendo N el número de imágenes en el conjunto de test, M el número de categorías, $y_{ij}$ 1 si la observación $i$ pertenece a la clase $j$ y 0 si no pertenece y $p_{ij}$ la probabilidad predicha de que el elemento $i$ pertenezca a la clase $j$.
+ siendo N el número de imágenes en el conjunto de test, M el número de
+ categorías, $y_{ij}$ 1 si la observación $i$ pertenece a la categoría $j$ y 0 si no
+ pertenece y $p_{ij}$ la probabilidad predicha de que el elemento $i$ pertenezca
+ a la categoría $j$.
 
  \subsection{Leaderboard y fases de la competición}
 
@@ -143,6 +144,82 @@ Una vez terminada la primera fase, \textit{Kaggle} publicará un nuevo conjunto 
 En esta segunda fase, que dura solo cinco días, el procedimiento es el mismo. Se publicarán puntuaciones usando un subconjunto del segundo conjunto de test y al terminar se publicará la puntuación usando el conjunto completo. Esta última puntuación será la puntuación final de la competición. Si alguno de los participantes ha hecho un envío en la primera fase pero no ha hecho ninguno en la segunda, quedará eliminado de la competición.
 
 \section{El conjunto de datos}
+\label{dataset}
 
-Aqui hago un pequeño análisis del conjunto de datos, la distribución de imágenes por clases, por estructura (tamaño de imaggen), color, etc
+El conjunto de datos que se provee en la competición consta de 3777 imágenes,
+divididas en ocho categorías. La figura \ref{histogram} muestra la cantidad de
+imágenes pertenecientes a cada categoría.
 
+\begin{figure}
+  \centering
+  \caption{Cantidad de imágenes pertenecientes a cada categoría}
+\label{histogram}
+  \includegraphics[width=\textwidth]{histogram_classes}
+\end{figure}
+
+Revisando el conjunto de datos encontramos varios problemas:
+
+\begin{itemize}
+\label{problems}
+    \item{La distribución de imágenes entre las categorías es altamente desigual. La
+categoría ALB tiene 1719 imágenes, que suponen más del 45 \% del conjunto
+completo. Por otro lado, las dos categorías con menos ejemplos, DOL y LAG
+contienen 117 y 67 imágenes respectivamente. Un modelo entrenado con este
+conjunto de entrenamiento puede tener problemas clasificando estas categorías
+con tan pocos ejemplos.}
+
+\item{A la hora de dividir el conjunto en subconjuntos de entrenamiento, validación y
+test hay que tener cuidado de dejar ejemplos de todas las categorías en cada
+uno. Con tan pocos ejemplos es sencillo dejar una categoría completa fuera de un
+conjunto al elegir imágenes aleatoriamente.}
+
+\item{Si visualizamos las imágenes notamos que algunas son casi idénticas. Los
+ejemplos de la figura \ref{same_image} parece que han sido sacadas de fotogramas
+de un mismo vídeo. Esto reduce la diversidad de ejemplos que contienen cada
+categoría. Teniendo una categoría con solo 67 ejemplos es preocupante que
+algunos de las imágenes sean casi idénticas, ya que el modelo puede llegar a
+usar características del barco en el que se encuentran los peces si mostramos
+variaciones del mismo pez con el mismo fondo.}
+
+\item{Se puede obsevar que en algunas imágenes los peces son muy difíciles de
+identificar, debido a que están parcialmente ocultos, la imagen está oscura o la
+cámara está sucia. Recordemos que algunas de las categorías son diferentes
+familias de atunes, bastante parecidos en forma entre ellos. Distinguir entre
+dos familias de atunes en una imagen oscura y con el atún parcialmente oculto
+puede llegar a ser imposible para un humano.}
+
+\item{Algunas imágenes están mal etiquetadas. Si el modelo predice la clase
+        incorrecta de la imagen con mucha confianza, le asignará poca
+        probabilidad a la clase correcta. Una probabilidad cercana a cero hará
+        que la pérdida logarítmica aumente mucho.
+        \[
+        \lim_{x \to 0}log(x)=\infty
+        \]
+}
+
+\subsection{Conjuntos de test}
+
+Para el envío de predicciones es necesario clasificar el conjunto de test que
+se provee en cada una de las fases de la competición. En la primera fase el
+conjunto de test consta de 1000 imágenes para clasificar, mientras que en la
+segunda consta de 13000.
+
+No se ha realizado ningún tipo de inspección o exploración de ninguno de los
+conjuntos de test, más allá de la inspección técnica (formatos y archivos) para
+evitar cualquier tipo de sesgo a la hora de crear el modelo. El segundo conjunto
+de test no se hizo público hasta seis días antes de terminar la competición, por
+lo que era imposible saber que tipo de imágenes iba a contener. Una exploración
+del primer conjunto de test podría haber hecho que se sobreajustara el modelo a
+este conjunto, empeorando la puntuación para el siguiente conjunto si este era
+diferente.
+        
+\end{itemize}
+
+\begin{figure}
+  \caption{Dos imágenes del conjunto de entrenamiento casi idénticas}
+\label{same_image}
+  \makebox[\textwidth]{
+  \includegraphics[width=0.4\linewidth]{fot1}
+  \includegraphics[width=0.4\linewidth]{fot2}
+  }
+\end{figure}

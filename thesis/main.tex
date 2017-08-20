@@ -188,11 +188,11 @@ aboveskip=2em
 %	QUOTATION PAGE
 %----------------------------------------------------------------------------------------
 
-\vspace*{0.2\textheight}
+%\vspace*{0.2\textheight}
 
-\noindent\enquote{\itshape Esta página venía en la plantilla y probablemente la borre}\bigbreak
+%\noindent\enquote{\itshape Esta página venía en la plantilla y probablemente la borre}\bigbreak
 
-\hfill Marco Herrero
+%\hfill Marco Herrero
 
 %----------------------------------------------------------------------------------------
 %	ABSTRACT PAGE
@@ -200,7 +200,14 @@ aboveskip=2em
 
 \begin{abstract}
 \addchaptertocentry{\abstractname} % Add the abstract to the table of contents
-Aqui escribo el abstract
+
+Solución presentada a la competición de modelos predictivos de la plataforma
+\textit{Kaggle}, que se trata de clasificar diferentes especies de peces en
+imágenes de barcos pesqueros. La solución explora el uso de redes
+convolucionales preentrenadas en arquitecturas de aprendizaje profundo para el
+reconocimento de imágenes, así como diferentes tipos de arquitecturas para la
+clasificación.
+
 \end{abstract}
 
 %----------------------------------------------------------------------------------------
@@ -222,12 +229,12 @@ Aqui escribo el abstract
 %	ABBREVIATIONS
 %----------------------------------------------------------------------------------------
 
-\begin{abbreviations}{ll} % Include a list of abbreviations (a table of two columns)
+%\begin{abbreviations}{ll} % Include a list of abbreviations (a table of two columns)
 
-\textbf{LAH} & \textbf{L}ist \textbf{A}bbreviations \textbf{H}ere\\
-\textbf{WSF} & \textbf{W}hat (it) \textbf{S}tands \textbf{F}or\\
-
-\end{abbreviations}
+%\textbf{LAH} & \textbf{L}ist \textbf{A}bbreviations \textbf{H}ere\\
+%\textbf{WSF} & \textbf{W}hat (it) \textbf{S}tands \textbf{F}or\\
+%
+%\end{abbreviations}
 
 %----------------------------------------------------------------------------------------
 %	PHYSICAL CONSTANTS/OTHER DEFINITIONS
@@ -258,6 +265,7 @@ Aqui escribo el abstract
 \include{Chapters/2-BasicConcepts} 
 \include{Chapters/3-Problema} 
 \include{Chapters/4-PresentedSolutions} 
+\include{Chapters/6-conclusions}
 %\include{Chapters/Chapter3}
 %\include{Chapters/Chapter4} 
 %\include{Chapters/Chapter5} 
@@ -271,7 +279,7 @@ Aqui escribo el abstract
 % Include the appendices of the thesis as separate files from the Appendices folder
 % Uncomment the lines as you write the Appendices
 
-%\include{Appendices/AppendixA}
+\include{Appendices/AppendixA}
 %\include{Appendices/AppendixB}
 %\include{Appendices/AppendixC}
 

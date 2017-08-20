@@ -1,11 +1,73 @@
 \chapter{Conceptos básicos}
-
 \label{BasicConcepts}
 
-\section{Redes neuronales}
-% TODO
-Introducción a las redes neuronales, back-propagation, capas, input-outpus, etc
 
+
+\section{Redes neuronales}
+Las redes neuronales son modelos computacionales basados en las conexiones
+neuronales que ocurren dentro del cerebro. Están compuestas de neuronas
+artificiales (también llamadas nodos o unidades) conectadas a través de
+conexiones dirigidas. Cada conexión tiene un peso numérico que determina la
+fuerza y el signo de la conexión.
+
+Las neuronas artificiales, al igual que las biológicas, se activan cuando
+reciben un determinado estímulo. Para determinar si una neurona artificial se
+activa primero hace la suma ponderada de sus entradas con los pesos de las
+conexiones y luego aplica una función de activación para producir la salida.
+
+Existen dos categorías principales de estructuras de redes neuronales:
+\textbf{redes con alimentación-hacia-delante} o \textbf{redes recurrentes},
+dependiendo si el grafo que representa las activaciones de la red junto con las
+neuronaes es acíclico o cíclico.
+
+En este trabajo se van a usar redes con alimentación-hacia-delante. Este tipo
+de redes representa una función de sus estados actuales, por lo que no tiene
+otro estado interno que no sea el de sus propios pesos. Están organizadas en
+capas de forma que cada neurona recibe entradas únicamente de las neuronas de
+la capa que la precede. En la figura \ref{red_neuronal} se puede apreciar una
+red neuronal con dos entradas, una capa oculta (que no tiene neuronas de
+entrada ni de salida) con dos neuronas y una salida, así como los pesos para
+cada conexión.
+
+\begin{figure}
+    \centering
+    \caption{\textit{Representación de una red neuronal con dos entradas, una
+    capa oculta con dos neuronas y una salida.}}
+  \label{red_neuronal}
+  \includegraphics[width=.7\textwidth]{red_neuronal}
+\end{figure}
+
+La idea de las redes neuronales es que sean capaces de imitar funciones a través
+de ejemplos de entradas y salidas de la función. Un algoritmo de aprendizaje
+sobre redes neuronales para esta función deberá ajustar los pesos de la red para
+minimizar alguna medida del error que se produce con el conjunto de
+entrenamiento \parencite{russel_norvig}.
+
+
+\subsection{Propagación hacia atrás}
+
+El algoritmo usado para entrenar la red se llama propagación hacia atrás. Se
+trata de actualizar los pesos de la red para reducir el error, entendido como
+la diferencia entre la salida de la red con la salida esperada.
+
+Para actualizar los pesos se usa el descenso del gradiente. Cada peso que lleva
+a una neurona de salida se actualiza de la siguiente manera: 
+\[
+    W_j \leftarrow W_j + \alpha \times Err \times g'(in) \times x_j
+\]
+
+Siendo $W_j$ el peso, $\alpha$ la tasa de aprendizaje, $Err$ el error cometido
+en la salida, $g'$ la derivada parcial de la función de activación y $x_j$ la
+entrada. Si el error es positivo, la salida de la red es demasiado pequeña y por
+ello los pesos se incrementan para las entradas positivas y se decrementan para
+las entradas negativas. Cuando el error el negativo ocurre lo contrario.
+
+Para actualizar los pesos de las neuronas ocultas se define una función de
+actualización de pesos. Es la misma con la que se actualizan los pesos de la
+capa final pero ahora se entiende que cada nodo oculto es responsable de una
+fracción del error en cada nodo de salida, proporcional al peso que tenga la
+conexión entre ambos nodos. Así que los valores se propagan hacia atrás con la
+fuerza de la conexión entre el nodo de salida y el nodo oculto.
 
 \section{Imágenes digitales}
 
@@ -87,13 +149,13 @@ Analizando cómo funcionan los filtros convolucionales vemos su parecido con las
 
 En esta idea se basan las redes convolucionales que trabajan con imágenes. Cada capa de la red constaŕa de varios filtros que se aplicarán a las imágenes que reciba, proporcionando los resultados a la siguiente capa. Ya que lo que importa es la composición de filtros, cada capa deberá entrenar varios filtros al mismo tiempo, permitiendo así aumentar la combinatoria final.
 
-De esta manera, los pesos de cada capa vendrían dados en una matriz tridimensional, que se pueden entender como $d$ (profundidad) filtros de dimensión  $w \times h$ (anchura y altura).
+De esta manera los pesos de cada capa vendrían dados en una matriz tridimensional, que se pueden entender como $d$ (profundidad) filtros de dimensión  $w \times h$ (anchura y altura), como se indica en la figura \ref{cnn_basic}.
 
 \begin{figure}
     \centering
-    \caption{\textit{TODO cambiar esta imagen por otra mas aclarativa}}
+    \caption{\textit{Ejemplo de dos representaciones de la misma red convolucional. Abajo el modelo resumido con cajas.}}
   \label{cnn_basic}
-  \includegraphics[width=\textwidth]{cnn}
+  \includegraphics[width=.7\textwidth]{cnn}
 \end{figure}
 
 
