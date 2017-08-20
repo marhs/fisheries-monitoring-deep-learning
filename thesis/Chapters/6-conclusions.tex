@@ -1,0 +1,22 @@
+% Chapter 1
+
+\chapter{Conclusiones} % Main chapter title
+\label{chap:conclusiones} % For referencing the chapter elsewhere, use \ref{Chapter1} 
+
+Se ha demostrado que con arquitecturas simples, usando modelos preentrenados y disponibles abiertamente, se pueden crear modelos que son capaces de extraer características de imágenes complejas y clasificar objetos que aparecen en ellas. 
+
+\section{Kaggle}
+
+La competición ha sido la primera de este organizador, \textit{The Nature Conservancy}. Esto se ha notado en diferentes detalles. La comunicación en el foro de la plataforma no ha sido del todo fluida, lo cual ha provocado algunos errores que no tenían que haberse cometido. El más destacado ha sido la descalifiación del ganador, que modificó el modelo en la segunda fase de la clasificación.
+
+Por otro lado, dejar a los participantes 3777 imágenes poco variadas (como ya vimos en el análisis de los datos) y usar 14000 para el test ha hecho que sea especialmente difícil generar un buen modelo. Un ejemplo de esto es que el archivo de ejemplo de envío, que contiene en cada elemento la misma predicción (la proporción de ejemplos de cada categoría, normalizado) haya conseguido medalla de plata, acabando en la posición 33.
+
+\section{Puntuación final}
+
+Aunque se le haya dado varias vueltas a usar las capas densas como clasificadores finales del modelo, el ganador ha sido el que no las usa: el modelo completamente convolucional. Creo que esto puede ser debido a que es capaz de, en esas últimas capas convolucionales, detectar elementos más generales de la imagen, descartando así el ruido que pueden producir los fondos de la imagen.
+
+\section{Pasos a seguir}
+
+Las siguientes mejoras de este problema creo que vienen reduciendo el ruido generado por todos los elementos de las imágenes que no son peces. Para esto habría primero que recortar automáticamente los peces de las imágenes y entrenar un nuevo modelo con dichas imágenes, pero para esto habría que tener un buen modelo de localización, ya que errar en la localización hará que se clasfiquen ejemplos incorrectamente.
+
+Por otro lado creo que también existe una posible mejora usando diferentes conjuntos de datos, como imágenes de peces sacadas de otras fuentes. De esta manera el modelo sería capaz de aprender características de los peces que no aparecen en los ejemplos.
