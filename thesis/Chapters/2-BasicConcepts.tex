@@ -1,24 +1,22 @@
 \chapter{Conceptos básicos}
 \label{BasicConcepts}
 
-
-
 \section{Redes neuronales}
 Las redes neuronales son modelos computacionales basados en las conexiones
 neuronales que ocurren dentro del cerebro. Están compuestas de neuronas
 artificiales (también llamadas nodos o unidades) conectadas a través de
 conexiones dirigidas. Cada conexión tiene un peso numérico que determina la
-fuerza y el signo de la conexión.
+fuerza de la conexión.
 
 Las neuronas artificiales, al igual que las biológicas, se activan cuando
 reciben un determinado estímulo. Para determinar si una neurona artificial se
-activa primero hace la suma ponderada de sus entradas con los pesos de las
+activa primero hace la suma de sus entradas ponderadas con los pesos de las
 conexiones y luego aplica una función de activación para producir la salida.
 
 Existen dos categorías principales de estructuras de redes neuronales:
 \textbf{redes con alimentación-hacia-delante} o \textbf{redes recurrentes},
-dependiendo si el grafo que representa las activaciones de la red junto con las
-neuronaes es acíclico o cíclico.
+dependiendo de si el grafo que representa las conexiones de la red es acíclico
+o cíclico.
 
 En este trabajo se van a usar redes con alimentación-hacia-delante. Este tipo
 de redes representa una función de sus estados actuales, por lo que no tiene
@@ -37,10 +35,10 @@ cada conexión.
   \includegraphics[width=.7\textwidth]{red_neuronal}
 \end{figure}
 
-La idea de las redes neuronales es que sean capaces de imitar funciones a través
-de ejemplos de entradas y salidas de la función. Un algoritmo de aprendizaje
-sobre redes neuronales para esta función deberá ajustar los pesos de la red para
-minimizar alguna medida del error que se produce con el conjunto de
+La idea de las redes neuronales es que sean capaces de aprender funciones
+generalizando ejemplos de entradas y salidas de la función. Un algoritmo de
+aprendizaje para redes neuronales deberá ajustar los pesos de la red de tal
+manera que se minimice alguna medida del error producido sobre el conjunto de
 entrenamiento \parencite{russel_norvig}.
 
 
@@ -69,6 +67,19 @@ fracción del error en cada nodo de salida, proporcional al peso que tenga la
 conexión entre ambos nodos. Así que los valores se propagan hacia atrás con la
 fuerza de la conexión entre el nodo de salida y el nodo oculto.
 
+\subsection{Codificación \textit{onehot}}
+
+La codificación \textit{onehot} es la representación de variables categóricas
+como un vector binario. Cada elemento del vector representa la pertenencia a
+una de las categorías disponibles en el problema. El vector final tendrá el
+mismo tamaño que la cantidad de categorías y estará completo de ceros, excepto
+en el lugar perteneciente a la categoría del elemento, donde contendrá un uno.
+
+Esta codificación es útil para redes neuronales, ya que al trabajar con varias
+categorías es más eficiente tener una neurona de salida para cada categoría
+disponible, en vez de trabajar con combinaciones de menos neuronas.
+
+
 \section{Imágenes digitales}
 
 Una imagen en el ámbito digital se entiende como una matriz de puntos.
@@ -78,29 +89,28 @@ Un ejemplo de esa representación es la matriz de la figura \ref{Seven_number}, 
 
 \begin{figure}
     \centering
-    \caption{\textit{Imagen resultante de la matriz}}
-  \label{Seven_number}
-  \includegraphics[width=\textwidth]{Seven_number}
-\end{figure}
-
-\begin{figure}
-    \centering
-    \caption{\textit{Imágen parcial en blanco y negro de un digíto escrito a mano}}
+    \caption{\textit{Imagen parcial en blanco y negro de un dígito escrito a mano}}
   \label{Seven_corner}
   \includegraphics[width=.6\textwidth]{Seven_corner}
 \end{figure}
 
+\begin{figure}
+    \centering
+    \caption{\textit{Matriz que representa los valores de cada punto en la imágen de la figura \ref{Seven_corner}}}
+  \label{Seven_number}
+  \includegraphics[width=\textwidth]{Seven_number}
+\end{figure}
+
+
 En imágenes en color se suele usar el sistema \textit{RGB (Red, Green, Blue)} para representar diferentes colores en cada punto de la imagen. En vez de usar un solo valor por punto se usan tres valores, cada uno representando la intensidad del color rojo, verde y azul en ese punto. Superponiendo estos tres valores se consigue el color final. Por lo tanto, las imágenes \textit{RGB} constan de tres matrices, cada una con los valores reales entre 0 y 1 para cada color.
 
-Para simplificar, algunos ejemplos de esta memoria van a usar una escala de grises, pero son aplicables a imágenes en color aplicando las operaciones a las tres diferentes capas al mismo tiempo.
+Para simplificar, algunos ejemplos de esta memoria van a usar una escala de grises, pero son aplicables a imágenes en color aplicando las operaciones a las tres diferentes matrices al mismo tiempo.
 
 \section{Filtros convolucionales}
 
 Al trabajar con esta interpretación de lo que es una imagen, se pueden usar operaciones sobre la matriz de la imagen para transformarla de diferentes maneras.
 
-Teniendo en cuenta cómo se representan, es claro que las imágenes digitales se pueden transformar mediante operaciones matriciales.
-
-Consideremos la siguiente matriz 3$\times$3 (llamada matriz filtro de convolución):
+Consideremos por ejemplo la siguiente matriz 3$\times$3 (llamada matriz filtro de convolución):
 
 \[
   F=
@@ -120,36 +130,44 @@ En el caso de la matriz F, la fila superior son todos valores negativos, la inte
 Esto ocurrirá con más frecuencia en los bordes superiores de objetos claros con fondo oscuro.
 
 Para mostar la utilidad de los filtros, los aplicaremos a la imagen de un dígito escrito a mano, sacado de la base de datos MNIST \parencite{lecun-mnisthandwrittendigit-2010}, que incluye 70000 imágenes de dígitos alfanuméricos escritos a mano.
-\begin{center}
+
+\begin{figure}
+    \centering
+    \caption{Imágen de un dígito escrito a mano, sacado de la base de datos MNIST}
+  \label{seven}
   \includegraphics{seven}
-\end{center}
+\end{figure}
 
-Si aplicamos el filtro F a la imagen podemos observar cómo resalta en blanco los bordes superiores y en negro los inferioes. Filtros similares, rotando los valores del filtro F, son capaces de resaltar bordes laterales u oblicuos.
+Si aplicamos el filtro F a la imagen de la figura \ref{seven} podemos observar cómo resalta en blanco los bordes superiores y en negro los inferiores. Véase la primera columna de la figura \ref{filters}. Filtros similares, rotando los valores del filtro F, son capaces de resaltar bordes laterales u oblicuos (resto de columnas de la figura \ref{filters}.
 
-\begin{center}
+\begin{figure}
+    \centering
+    \caption{Aplicación de diferentes filtros a la imagen de la figura \ref{seven}}
+  \label{filters}
   \includegraphics{filters}
-\end{center}
+\end{figure}
 
-Lo interesante de este método es que hemos conseguido resaltar características del objeto representado en la imagen simplemente con operaciones matricialessimplemente con operaciones matriciales.
+Lo interesante de este método es que hemos conseguido resaltar características
+del objeto representado en la imagen usando solo operaciones matriciales.
 
 Las matrices de convolución pueden ser de mayor tamaño, permitiendo capturar características más complejas. La matriz de 3$\times$3 es la menor matriz que permite definir en su totalidad el concepto de espacio, pudiendo extraer características espaciales en dos dimensiones.
 
-A la hora de trabajar con imágenes en color es necesario usar un modelo de color. Uno de los más usados, RGB, se compone de tres capas, una dedicada a la intensidad roja, otra a la verde y la última a la azul, de ahí su nombre. Cada filtro se aplicaría a cada capa por separado, permitiendo de esta manera detectar diferentes características de la imagen que ocurran solo en uno de los colores.
+A la hora de trabajar con imágenes en color es necesario aplicar cada filtro a
+cada capa por separado, permitiendo de esta manera detectar diferentes
+características de la imagen que ocurran solo en uno de los colores.
 
 Para analizar cómo afectan diferentes filtros a una imagen, en la página \parencite{visualizer_convolution} se pueden probar ejemplos con filtros personalizados, haciendo el concepto mucho más sencillo de comprender.
 
 \section{Redes neuronales convolucionales}
 \label{sec:conv-net}
 
-Hemos explorado la idea de que determinados filtros son capaces de extraer información localizada sobre características de la imagen. En el ejemplo del apartado anterior, dada una imagen podíamos saber si había bordes superiores y dónde se podían encontrar. Esto puede ser de gran utilidad en el campo de reconocimiento de imágenes, ya que podemos usar esa información localizada para categorizar o aplicar otro tipo de técnicas en esas áreas señaladas.
+Hemos explorado la idea de que determinados filtros son capaces de extraer información localizada sobre características de la imagen. En el ejemplo del apartado anterior, dada una imagen podíamos saber si había bordes superiores y dónde se podían encontrar. Esto puede ser de gran utilidad en el campo de reconocimiento de imágenes, ya que podemos usar esa información localizada para categorizar o aplicar otro tipo de técnicas en esas áreas señaladas. El problema radica en encontrar los mejores filtros para que extaigan las características más relevantes de una imagen.
 
-El problema radica en encontrar los mejores filtros para que extaigan las características más relevantes de una imagen.
+Analizando cómo funcionan los filtros convolucionales vemos su parecido con las redes neuronales. Al igual que estas, los filtros se pueden entender como funciones que al aplicarse a los datos de entrada producen unos datos de salida que serán más o menos relevantes para el objetivo buscado. El entrenamiento de una red neuronal va modificando los pesos de las diferentes capas hasta que produce una salida relevante para cada ejemplo del conjunto de entrenamiento. Si entendemos los pesos como matrices convolucionales, podemos hacer que sea la propia red la que busque el mejor filtro para nuestro problema de clasificación. De hecho, ya que las redes neuronales son capaces de componer diferentes funciones en diferentes capas de la red para aprender funciones no lineales, podemos aplicar la misma idea a las redes con filtros: componer diferentes filtros para poder extraer características más complejas.
 
-Analizando cómo funcionan los filtros convolucionales vemos su parecido con las redes neuronales. Al igual que estas, los filtros se pueden entender como funciones que al aplicarse a los datos de entrada produces unos datos de salida que serán más o menos relevantes para el objetivo buscado. El entrenamiento de una red neuronal va modificando los pesos de las diferentes capas hasta que produce una salida relevante para cada ejemplo del conjunto de entrenamiento. Si entendemos los pesos como matrices convolucionales, podemos hacer que sea la propia red la que busque el mejor filtro para nuestro problema de clasificación. De hecho, ya que las redes neuronales son capaces de componer diferentes funciones en diferentes capas de la red para aprender funciones no lineales, podemos aplicar la misma idea a las redes con filtros: componer diferentes filtros para poder extraer características más complejas.
+En esta idea se basan las redes convolucionales que trabajan con imágenes. Cada capa de la red constará de varios filtros que se aplicarán a las imágenes que reciba, proporcionando los resultados a la siguiente capa. Ya que lo que importa es la composición de filtros, cada capa deberá entrenar varios filtros al mismo tiempo, permitiendo así aumentar la combinatoria final.
 
-En esta idea se basan las redes convolucionales que trabajan con imágenes. Cada capa de la red constaŕa de varios filtros que se aplicarán a las imágenes que reciba, proporcionando los resultados a la siguiente capa. Ya que lo que importa es la composición de filtros, cada capa deberá entrenar varios filtros al mismo tiempo, permitiendo así aumentar la combinatoria final.
-
-De esta manera los pesos de cada capa vendrían dados en una matriz tridimensional, que se pueden entender como $d$ (profundidad) filtros de dimensión  $w \times h$ (anchura y altura), como se indica en la figura \ref{cnn_basic}.
+De esta manera, los pesos de cada capa vendrían dados en una matriz tridimensional, que se puede entender como $d$ (profundidad) filtros de dimensión  $w \times h$ (anchura y altura), como se indica en la figura \ref{cnn_basic}.
 
 \begin{figure}
     \centering
@@ -172,7 +190,13 @@ Las capas convolucionales son las que hemos visto hasta ahora. Tendrán como pes
 
 Al igual que en las redes clásicas es necesario tratar la salida de la aplicación de los pesos sobre las entradas con una función de activación. 
 
-La manera habitual de modelizar la salida de una neurona en las RNAs es a través de $f(x) = tanh(x)$ o $f(x) = (1 + e^{-x})^{-1}$ (función sigmoide). A la hora de entrenar la red con descenso del gradiente, estas funciones son mucho más lentas que otra función que también evita la linealidad: $f(x) = max(0, x)$, llamada ReLU (\textit{Rectifier Linear}). Las redes neuronales convolucionales entrenan varias veces más rápido usando ReLU (ver figura \ref{relu-vs-tanh}) que las equivalentes usando la función $tanh$.
+La manera habitual de modelizar la salida de una neurona en las RNAs es a
+través de $f(x) = tanh(x)$ o $f(x) = (1 + e^{-x})^{-1}$ (función sigmoide). A
+la hora de entrenar la red con descenso del gradiente, estas funciones son
+mucho más lentas que otra función que también evita la linealidad: $f(x) =
+max(0, x)$, llamada ReLU (\textit{Rectifier Linear}). Las redes neuronales
+convolucionales entrenan varias veces más rápido usando ReLU  que las
+equivalentes usando la función $tanh$ (ver figura \ref{relu-vs-tanh}).
 
 \begin{figure}
     \centering
@@ -183,7 +207,12 @@ La manera habitual de modelizar la salida de una neurona en las RNAs es a travé
 
 \subsubsection{Capa de muestreo - POOL \textit{(Pooling layer)}}
 
-Al usar convoluciones en una imagen, la información del entorno de cada punto queda difumnada y redundante. Gracias a esto se puede reducir el tamaño del problema mediante muestreo. Las capas de muestreo (\textit{pooling layers}) resumen las salidas del entorno de cada grupo de neuronas. Un ejemplo de función de muestreo sería elegir el valor máximo de cada cuadrado de 4 píxeles (figura \ref{maxpool})
+Al usar convoluciones en una imagen, la información del entorno de cada punto
+queda difuminada y redundante. Gracias a esto se puede reducir el tamaño del
+problema mediante muestreo. Las capas de muestreo (\textit{pooling layers})
+resumen las salidas del entorno de cada grupo de neuronas. Un ejemplo de
+función de muestreo sería elegir el valor máximo de cada cuadrado de 4 píxeles
+(figura \ref{maxpool}).
 
 Si la salida de una capa CONV + RELU es $32 \times 32 \times 8$, al aplicar la capa de muestreo la salida se convertirá en $16 \times 16 \times 8$. Al eliminar el 75\% de las activaciones se reducen la cantidad de parámetros y el tiempo de computación, y además ayuda a reducir el sobreajuste.
 
