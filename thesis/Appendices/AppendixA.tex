@@ -9,9 +9,12 @@ Al principio de este trabajo se comentó que era necesario un enfoque de desarro
 
 \section{Hardware}
 
-\textit{Keras} permite aumentar la velocidad de entrenamiento usando el procesador gráfico del sistema, siempre que este sea compatible con CUDA (). Para este problema se han usado dos equipos diferentes, ambos compatibles con CUDA.
+\textit{Keras} permite aumentar la velocidad de entrenamiento usando el
+procesador gráfico del sistema, siempre que este sea compatible con CUDA \parencite{cuda}.
+Para este problema se han usado dos equipos diferentes, ambos compatibles con
+CUDA.
 
-Para la mayoría de entrenamientos y experimentos se ha usado un ordenador de las siguientes características:
+Para la mayoría de entrenamientos y experimentos se ha usado un ordenador con las siguientes características:
 
 \begin{itemize}
     \item{Procesador: Intel i3, 2.7 GHz}
@@ -21,7 +24,7 @@ Para la mayoría de entrenamientos y experimentos se ha usado un ordenador de la
 
 Este equipo era suficiente para la mayoría de entrenamientos. Sin embargo cuando era necesario entrenar un conjunto de datos más grande, como la segunda fase de la clasificación, con 13000 ejemplos, el equipo tardaba demasiado en entrenar algunos modelos.
 
-Por eso se optó por buscar una solución en la nuben que permitiese alquilar una potencia gráfica superior durante tiempo limitado. Al final se ha optado por las máquinas virtuales de \textit{Amazon AWS}, que permite contratar máquinas por horas. Una de ellas, identificada \textit{p2.xlarge}, ofrece las siguientes características:
+Por eso se optó por buscar una solución en la nube que permitiese alquilar una potencia gráfica superior durante tiempo limitado. Al final se ha optado por las máquinas virtuales de \textit{Amazon AWS}, que permite contratar máquinas por horas. Una de ellas, identificada \textit{p2.xlarge}, ofrece las siguientes características:
 
 \begin{itemize}
     \item{Procesador: Intel i7, 3.5 GHz, 4 núcleos}
@@ -29,5 +32,5 @@ Por eso se optó por buscar una solución en la nuben que permitiese alquilar un
     \item{61 GB de RAM}
 \end{itemize}
 
-Este equipo, con un precio de 0.80 € la hora, ofrece potencia más que suficiente para entrenar grandes cantidades de datos rápidamente.
+Este equipo, con un precio de 0.80 euros la hora, ofrece potencia más que suficiente para entrenar grandes cantidades de datos rápidamente.
 
