@@ -369,19 +369,42 @@ Los resultados obtenidos con esta configuracion no mejoran los resultados de la 
 
 \subsection{Normalización por lotes}
 
-En muchos campos del aprendizaje automático es habitual normalizar las entradas de los modelos. Normalizar un conjunto de entradas hace que todas estén en la misma escala. Si existe una entrada mucho mayor o menor que el resto esta puede hacer que el entrenamiento arrastre un error mayor del necesario, produciendo inestabilidad y dificultando la convergencia del modelo.
+En muchos campos del aprendizaje automático es habitual normalizar las entradas
+de los modelos. Si existe una entrada mucho mayor o menor que el resto esta
+puede hacer que el entrenamiento arrastre un error mayor del necesario,
+produciendo inestabilidad y dificultando la convergencia del modelo. Normalizar
+un conjunto de entradas hace que todas estén en la misma escala. 
 
-El caso de las redes neuronales no es una excepción. Una entrada con un valor demasiado grande puede llevar a tener un peso determinado demasiado grande para contrarrestarla.
+El caso de las redes neuronales no es una excepción. Una entrada con un valor
+demasiado grande puede llevar a tener un peso determinado demasiado grande para
+contrarrestarla.
 
-Una normalización estándar en aprendizaje automático es restar de cada entrada el valor medio del conjunto de datos y luego dividirlo por la desviación estándar del mismo. Esto aún presenta problemas para casos como el de este proyecto donde se usa el gradiente del descenso estocástico (cita a su definición en basicos:ann).
+Una normalización estándar en aprendizaje automático es restar de cada entrada
+el valor medio del conjunto de datos y luego dividirlo por la desviación
+estándar del mismo. Esto aún presenta problemas para casos como el de este
+proyecto donde se usan algoritmos como el gradiente del descenso estocástico
+para la propagación hacia atrás (sección \ref{sec:backprop}).
 
-Los modelos principales citados en este trabajo, \parencite{krizhevsky2012imagenet} y \parencite{simonyan}, usan sus propias técnicas de normalización, aparte de usar activaciones \textit{ReLu} (sección \ref{sec:relu}) que son menos sensibles a los datos de entrada sin normalizar. Sin embargo, en 2015 se presenta una técnica muy interesante de normalización que cuadra muy bien con el gradiente del descenso estocástico: la normalización por lotes (o \textit{batch normalization}) \parencite{batch_normalization}.
+Los modelos principales citados en este trabajo,
+\parencite{krizhevsky2012imagenet} y \parencite{simonyan}, usan sus propias
+técnicas de normalización, aparte de usar activaciones \textit{ReLu} (sección
+\ref{sec:relu}) que son menos sensibles a los datos de entrada sin normalizar.
+Sin embargo, en 2015 se presenta una técnica muy interesante de normalización
+que cuadra muy bien con el gradiente del descenso estocástico: la normalización
+por lotes (\textit{batch normalization}) \parencite{batch_normalization}.
 
-La diferencia con una normalización estándar es que tras normalizar las entradas de una capa, se multiplican por un parámetro aleatorio, y luego se suma otro, cambiando así la desviación estándar y la media de la entrada. Estos cuatro parámetros (los dos parámetros nuevos, la desviación estándar y la media) se hacen entonces entrenables como pesos del modelo.
+La diferencia con una normalización estándar es que tras normalizar las
+entradas de una capa se multiplican por un parámetro aleatorio y luego se
+suma otro, cambiando así la desviación estándar y la media de la entrada. Estos
+dos parámetros se hacen entonces entrenables como pesos del modelo.
 
-Los modelos actuales que usan esta normalización por lotes consiguen la misma precisión que los modelos sin ella usando catorce veces menos pasos de entrenamiento \parencite{batch_normalization}.
+Los modelos actuales que usan esta normalización por lotes consiguen la misma
+precisión que los modelos sin ella usando catorce veces menos pasos de
+entrenamiento \parencite{batch_normalization}.
 
-Para aplicar esta normalización por lotes al modelo que se está entrenando hay que añadir las capas de normalización por lotes (también disponibles en Keras) al modelo denso:
+Para aplicar esta normalización por lotes al modelo que se está entrenando hay
+que añadir las capas de normalización por lotes (también disponibles en
+\textit{Keras}) al modelo denso:
 
 \begin{python}
 def list_dense_layers(dropout):
@@ -400,9 +423,19 @@ def list_dense_layers(dropout):
 dense_model = keras.models.Sequential(list_dense_layers(0.45))
 \end{python}
 
-Esto no es suficiente. A diferencia del \textit{dropout}, la normalización por lotes sí que es capaz de mejorar la red convolucional del modelo preentrenado. Gracias a la popularidad de esta técnica y de los modelos preentrenados que se usan en este trabajo, ya existen entrenamientos del modelo VGG original usando normalización por lotes, ahorrando la necesidad de entrenar una red tan grande. Una descripción de esto entrenamientos se puede encontrar en \parencite{pretrained_with_bn}.
+Esto no es suficiente. A diferencia del \textit{dropout}, la normalización por
+lotes sí que es capaz de mejorar la red convolucional del modelo preentrenado.
+Gracias a la popularidad de esta técnica y de los modelos preentrenados que se
+usan en este trabajo, ya existen entrenamientos del modelo VGG original usando
+normalización por lotes, ahorrando la necesidad de entrenar una red tan grande.
+Una descripción de estos entrenamientos se puede encontrar en
+\parencite{pretrained_with_bn}.
 
-En el caso de este trabajo se ha adaptado bajo la clase $Vgg16BN$, siguiendo los principios descritos en \parencite{fastai}. Al cambiar la red convolucional original hay que volver a transformar el conjunto de datos que se usaba para obtener los resultados de aplicar los filtros actualizados sobre las imágenes de entrada.
+En el caso de este trabajo se ha adaptado la clase $Vgg16BN$, siguiendo
+los principios descritos en \parencite{fastai}. Al cambiar la red convolucional
+original hay que volver a transformar el conjunto de datos que se usaba para
+obtener los resultados de aplicar los filtros actualizados sobre las imágenes
+de entrada.
 
 \begin{python}
 # Carga del modelo VGG16 con normalizacion por lotes
@@ -411,21 +444,21 @@ import utils
 model = Vgg16BN()
 conv_model, _ = utils.split_at(model, MaxPooling2D)
 
-# Cargamos los diferentes conjuntos de datos
+# Carga de los diferentes conjuntos de datos
 train, train_labels = get_data(path + 'train')
 valid, valid_labels = get_data(path + 'valid')
 test, test_labels = get_data(path + 'test')
 
-# Convertir dataset a features mediante la red convolucional
+# Conversion a caracteristicas mediante la red convolucional
 train_feat = conv_model.predict(train)
 valid_feat = conv_model.predict(valid)
 test_feat = conv_model.predict(test)
 
-# Entrenar la red
+# Entrenamiento la red
 dense_model = keras.models.Sequential(list_dense_layers(0.45))
 dense_model.compile(...)
 dense_model.fit(...)
-# Evaluar el modelo sobre el conjunto de test
+# Evaluacion del modelo sobre el conjunto de test
 dense_model.evaluate(test_feat, test_labels)
 >>> [0.45127591543710, 0.96109451984491]
 \end{python}
@@ -442,7 +475,15 @@ Uno de los principales obstáculos de este problema es el reducido tamaño del c
 
 Uno de los métodos que se usan para tratar de reducir el sobreajuste del modelo es el llamado aumento de datos (\textit{data augmentation}). Consiste en generar imágenes de entrenamiento adicionales a partir de las ya disponibles, rotando la imagen original, aumentándola, cambiando ligeramente el color, etc.
 
-En el caso de nuestro problema esta técnica es especialmente interesante, ya que las cámaras de los barcos están fijas apuntando siempre a la misma zona. En las fotos sobre los peces capturados, estos siempre suelen estar con la cabeza apuntando en dirección contraria al agua. Ello hace que la red reconozca más fácilmente peces dispuestos en una determinada dirección pero costándole más trabajo para el resto de direcciones. Si las redes convolucionales ayudaban a detectar determinados patrones en cualquier punto de la imagen, el aumento de datos hace lo propio de otras variantes como la rotación, el tamaño o el filtro de color dado por el ambiente.
+En el caso de nuestro problema esta técnica es especialmente interesante, ya
+que las cámaras de los barcos están fijas apuntando siempre a la misma zona. En
+las fotos sobre los peces capturados estos siempre suelen estar con la cabeza
+apuntando en dirección contraria al agua. Ello hace que la red reconozca más
+fácilmente peces dispuestos en una determinada dirección, costándole más
+trabajo para el resto de direcciones. Si las redes convolucionales ayudaban a
+detectar determinados patrones en cualquier punto de la imagen, el aumento de
+datos hace lo propio de otras variantes como la rotación, el tamaño o el filtro
+de color dado por el ambiente.
 
 Un ejemplo de aumento de datos se muestra en la figura \ref{augmentations}, que contiene cuatro imágenes obtenidas al reescalar de distintas maneras la imagen original de la figura \ref{aug-original}.
 
@@ -461,12 +502,16 @@ Un ejemplo de aumento de datos se muestra en la figura \ref{augmentations}, que 
   \makebox[\textwidth]{\includegraphics[width=.2\linewidth]{au4}}
 \end{figure}
 
-Para trabajar con aumentos de datos, \textit{Keras} proporciona una serie de opciones de transformación dentro de la utilidad para importar conjuntos de datos. Al definir dichas opciones, como por ejemplo rotación, zoom o volteo horizontal, Keras generará nuevas imágenes a la vez que carga el conjunto de datos en memoria.
+Para trabajar con aumentos de datos, \textit{Keras} proporciona una serie de
+opciones de transformación dentro de la utilidad para importar conjuntos de
+datos. Al definir dichas opciones, como por ejemplo rotación, zoom o volteo
+horizontal, \textit{Keras} generará nuevas imágenes a la vez que carga el
+conjunto de datos en memoria.
 
 Si es necesario conocer cómo se aplican las transformaciones a las diferentes imágenes, es posible especificar un directorio de salida del generador de imágenes, de tal manera que los resultados de las distintas transformaciones se guarden en directorios particulares.
 
 \begin{python}
-# Crear el generador de imagenes
+# Creacion del generador de imagenes
 image_generator = image.ImageDataGenerator(
     rotation_range=30,
     horizontal_flip=True,
@@ -482,14 +527,14 @@ batches = img_generator.flow_from_directory(
     save_to_dir=path+'augmentation',
 )
 
-# Iterar sobre batches para extraer los datos
+# Iteracion sobre lotes para extraer los datos
 # En este caso se sacan 4 veces la cantidad de datos originales
 data = [batch.next() for _ in range(batches.nb_samples * 4)]
 \end{python}
 
 Ahora no es necesario modificar el modelo, solo reentrenarlo con los nuevos datos. Como ha ocurrido antes, al cambiar el conjunto de datos hay que transformarlo pasándolo por la red convolucional, usando en este caso la última versión con normalización por lotes.
 
-Lo interesante de ver en este caso es la reducción sobreajuste que se ha obtenido.
+Lo interesante en este caso es la reducción del sobreajuste que se ha obtenido.
 
 \begin{python}
 Epoch 5/7
