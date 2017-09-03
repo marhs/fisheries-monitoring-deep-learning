@@ -47,36 +47,31 @@ La solución adoptada ha sido realizar un muestreo estratificado para realizar l
 
 \subsection{Evaluación del modelo}
 
-Para una búsqueda más eficiente de parámetros y configuraciones los modelos se evaluarán previamente usando nuestro subconjunto de test local. Aquellos modelos especialmente interesantes por tener una puntuación máxima local entre aquellos a los que se compara habrá que enviarlo a \textit{Kaggle} para su evaluación completa.
+Para una búsqueda más eficiente de parámetros y configuraciones los modelos se evaluarán previamente usando nuestro subconjunto de test local. Aquellos modelos que resulten especialmente interesantes por tener una puntuación máxima local entre aquellos a los que se compara se subirán entonces a \textit{Kaggle} para su evaluación usando el conjunto de test correspondiente a la fase en la que nos encontremos.
 
 \textit{Kaggle} usa la pérdida logarítmica para medir la bondad de cada modelo (sección 
-\ref{sec:envio-y-eval}). Esta métrica hace que si puntuamos con una probabilidad muy baja la categoría correcta de la imagen, la métrica se vea perjudicada (como se describió en \ref{problemas}).
-
-Un truco para solventar posibles problemas generados a partir de esta métrica es recortar las probabilidades de cada clase, tanto en su valor máximo como en el mínimo. En este caso vamos a hacer que las probabilidades superiores a 0.95 se recorten a 0.95 y las inferiores a 0.15 se recorten a 0.15.
+\ref{sec:envio-y-eval}). Esta métrica se verá perjudicada si puntuamos con una probabilidad muy baja la categoría correcta de la imagen. Una técnica para tratar de aliviar este problema consiste en truncar las probabilidades de cada clase, tanto en su valor máximo como en el mínimo. En nuestro caso vamos a hacer que las probabilidades superiores a 0.95 se trunquen a 0.95 y las inferiores a 0.15 se trunquen a 0.15.
 
 
 \subsection{Software}
 
-Todos los modelos de redes convolucionales que se van a entrenar en este proyecto han sido entrenados usando Keras sobre cuadernos de \textit{iPython}. La estructura de desarrollo y algunas utilidades están descritas en \parencite{fastai} y \parencite{felixyu}.
+Todos los modelos de redes convolucionales construidas en este proyecto han sido entrenados usando \textit{Keras} (véase apéndice \ref{ap:keras}) sobre cuadernos de \textit{Jupyter} \parencite{jupyter}. La estructura de desarrollo y algunas utilidades están descritas en \parencite{fastai} y \parencite{felixyu}.
 
 
-\section{Idea}
+\section{Arquitectura de los modelos}
 
-Los humanos somos expertos identificando cosas visualmente. Esto se debe, en
+Los humanos somos expertos en la identificación visual. Esto se debe, en
 parte, a que nos llevamos la mayor parte de nuestra vida resolviendo problemas
 de identificación visual y somos muy eficientes generalizando las
 características de una imagen.
 
-Si queremos aplicar la misma idea a este problema necesitamos que el modelo
-aprenda a generalizar características de elementos de una imagen.  Como ya se
-comentó al hablar de las redes convolucionales (capítulo
-\ref{sec:conv-net-arch}), las arquitecturas encontradas en problemas similares
-\parencite{krizhevsky2012imagenet} permiten aprovechar entrenamientos
-anteriores mediante el uso de redes convolucionales (CONV) y capas densas (FC).
-
-\section{Arquitectura}
-
-La competición de reconocimiento visual a gran escala de ImageNet, conocida por sus siglas ILSVRC (\textit{Imagenet Large Scale Visual Recognition Challenge}) \parencite{ILSVRC} es una competición de reconocimiento de imágenes sobre un conjunto de 150000 imágenes. Estas imágenes deben clasificarse en 1000 categorías diferentes.
+La competición de reconocimiento visual a gran escala de \textit{ImageNet},
+conocida por sus siglas ILSVRC (\textit{Imagenet Large Scale Visual Recognition
+Challenge}) \parencite{ILSVRC} es una competición de reconocimiento de imágenes
+que pretende seguir el progreso alcanzado por los modelos de inteligencia
+artificial a la hora de identificar y generalizar elementos de una imagen. En
+esta competición se deben detectar elementos en 150000 fotografías y
+clasificarlos en una entre 1000 categorías diferentes.
 
 En 2010 y 2011 los modelos ganadores consiguieron una tasa de error de un 28,2 \% y un 25.8 \%, respectivamente. En 2012, el modelo presentado en \parencite{krizhevsky2012imagenet} ganó con una tasa de error 16.4 \%, superando en casi un 10 \% al segundo clasificado. Esta victoria hizo que el enfoque de esta propuesta haya sido usado por los ganadores de los años siguientes.
 
