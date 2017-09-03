@@ -557,13 +557,40 @@ de \textbf{0.9364}, el mejor hasta ahora.
 
 \section{Modelo convolucional}
 
-Hasta ahora se ha seguido siempre el mismo esquema: una vez transformado el conjunto de datos entrenamos una red densa (completamente conectada) de tres capas. Además, una parte del preprocesamiento de las imágenes consiste en redimensionarlas a un tamaño más manejable, de $224\times224$ píxeles.
+Hasta ahora se ha seguido siempre el mismo esquema: una vez transformado el
+conjunto de datos entrenamos una red densa (completamente conectada) de tres
+capas. Además, una parte del preprocesamiento de las imágenes consiste en
+redimensionarlas a un tamaño más manejable, de $224\times224$ píxeles.
 
-Una de las ventajas de las redes convolucionales es que permite aumentar el tamaño de las imágenes elegidas sin que por ello se incremente la complejidad de la red, ya que el número de pesos no cambiaría, solo el tamaño de la salida. Sin embargo, la complejidad de la red neuronal estándar que hemos colocado tras la red convolucional sí que vería incrementarse muchísimo su complejidad con el cambio de tamaño de las imágenes.
+Una de las ventajas de las redes convolucionales es que permite aumentar el
+tamaño de las imágenes elegidas sin que por ello se incremente la complejidad
+de la red, ya que el número de pesos no cambiaría, solo el tamaño de la salida.
+Sin embargo, la complejidad de la red neuronal estándar que hemos colocado tras
+la red convolucional sí que vería incrementarse muchísimo su complejidad con el
+cambio de tamaño de las imágenes.
 
-Para intentar aprovechar esta ventaja que ofrecen las redes convolucionales frente a las redes convolucionales clásicas, se puede intentar trabajar usando redes convolucionales en todo el proceso, clasificando al final con una única capa de activación clásica.
+Para intentar aprovechar esta ventaja que ofrecen las redes convolucionales
+frente a las redes densas, se puede intentar trabajar usando solo capas
+convolucionales en todo el proceso, clasificando al final con una única capa de
+activación clásica.
 
-Aquí se estaría desarrollando una idea que se comentaba al principio de este trabajo, el conseguir ocho filtros cuya salida sea la probabilidad de que en la zona de la imagen esté apareciendo el pez de la clase elegida.
+Aquí se estaría desarrollando una idea que se comentaba al principio de este
+trabajo, el conseguir ocho filtros cuya salida sea la probabilidad de que en la
+zona de la imagen esté apareciendo el pez de la clase elegida.
+
+Se usarán inicialmente tres capas de convoluciones, con 128 filtros cada una.
+La combinación de estos 128 filtros permitirá capturar la combinatoria de
+caracterísicas que representa la red convolucional preentrenada. Al final se
+añade una última capa de convolución con 8 filtros, el mismo número de
+categorías en las que clasificar.
+
+Las imágenes resultantes de estos filtros se transforman a una sola salida
+mediante una capa \textit{GlobalAveragePooling2D}. Esta capa funciona como las
+capas POOL de la red convolucional, pero usando la media del total de los
+píxeles de la imagen, generando una salida de un valor por filtro que pueda ser
+entendida por la capa de activación.
+
+La arquitectura final de la red se muestra en la figura \ref{fcn_arch}.
 
 \begin{python}
 def build_conv_layers():
@@ -585,11 +612,6 @@ def build_conv_layers():
     ]
 \end{python}
 
-Se usarán inicialmente tres capas de convoluciones, con 128 filtros cada una. La combinación de estos 128 filtros permitirá capturar la combinatoria de caracterísicas que representa la red convolucional preentrenada. Al final se añade una última capa de convolución con 8 filtros, el mismo número de categorías en las que clasificar.
-
-Las imágenes resultantes de estos filtros se transforman a una sola entrada mediante una capa \textit{GlobalAveragePooling2D}. Esta capa funciona como las capas POOL de la red convolucional, pero usando la media del total de los píxeles de la imagen, generando una salida de un valor por filtro que pueda ser entendida por la capa de activación.
-
-De nuevo habrá que transformar el conjunto de datos por medio de la red convolucional preentrenada, ya que se va a usar un tamaño de imagen de $360\times640$.
 
 \begin{figure}
     \caption{Arquitectura de la red completamente convolucional}
@@ -597,7 +619,15 @@ De nuevo habrá que transformar el conjunto de datos por medio de la red convolu
   \makebox[\textwidth]{\includegraphics[width=0.7\linewidth]{fcn_arch}}
 \end{figure}
 
-Aunque, como se ha comentado, la red convolucional acepta un aumento del tamaño de la imagen sin aumentar exponencialmente el tiempo de entrenamiento, el entrenamiento de una red convolucional es mucho más costoso que el de una red clásica. Esto se debe a que hay que actualizar $n\timesn$ pesos por cada píxel de cada imagen. En este caso el entrenamiento de la red completamente convolucional ha tardado 24 veces más que el entrenamiento de la red densa del capítulo anterior.
+De nuevo habrá que transformar el conjunto de datos por medio de la red
+convolucional preentrenada, ya que se va a usar un tamaño de imagen de
+$360\times640$. Aunque, como se ha comentado, la red convolucional admite un
+aumento del tamaño de la imagen sin que crezca exponencialmente el tiempo de
+entrenamiento, el entrenamiento de una red convolucional es mucho más costoso
+que el de una red clásica. Esto se debe a que hay que actualizar $n\timesn$
+pesos por cada píxel de cada imagen. En este caso el entrenamiento de la red
+completamente convolucional ha tardado 24 veces más que el entrenamiento de la
+red densa del capítulo anterior.
 
 \begin{python}
 conv_model.evaluate(test_feat, test_labels)
@@ -611,9 +641,22 @@ sido de \textbf{0.8109}.
 
 \subsection{Visualización del modelo}
 
-El trabajar en todo momento (salvo en la última capa= con redes convolucionales, implica que los pesos son siempre filtros que se aplican a imágenes. Se pretende entonces conseguir filtros que resalten la existencia en cada zona de la imagen de un pez de una determinada clase.
+El trabajar en todo momento (salvo en la última capa) con redes
+convolucionales, implica que los pesos son siempre filtros que se aplican a
+imágenes. Se pretende entonces conseguir filtros que resalten la existencia en
+cada zona de la imagen de un pez de una determinada clase.
 
-Se pueden usar los diferentes valores de los filtros para construir un mapa de calor para la categoría que le corresponde. Un mapa de calor es una representación gráfica de los valores de una matriz bidimensional. Generalmente valores pequeños se asocian a colores más claros,como el azul o el verde, y valores mayores a colores más cálidos, como el rojo o el morado.  Si se redimensiona el filtro (ya que ha sido reducido por las capas de \textit{MaxPooling2D}) al tamaño de la imagen original se puede ver cómo encuentra el pez a clasificar en cada imagen, tal y como se muestra por ejemplo en la figura 4.8.
+Se pueden usar los diferentes valores de los filtros para construir un mapa de
+calor para la categoría que le corresponde. Un mapa de calor es una
+representación gráfica de los valores de una matriz bidimensional. Generalmente
+valores pequeños se asocian a colores más claros, como el azul o el verde, y
+valores mayores a colores más cálidos, como el rojo o el morado.
+
+Si se redimensiona el filtro (ya que ha sido reducido por las capas de
+\textit{MaxPooling2D}) al tamaño de la imagen original, se puede ver cómo
+encuentra el pez a clasificar en cada imagen. Como ejemplo, al aplicar la red a
+la imagen de la figura \ref{fc-fish} podemos visualizar el filtro perteneciente
+a su categoría (ALB: \textit{Thunnus alalunga}) en la figura \ref{fc-heatmap}.
 
 \begin{figure}
     \caption{Una imagen correspondiente a la clase ALB: \textit{Thunnus alalunga}}
@@ -622,20 +665,34 @@ Se pueden usar los diferentes valores de los filtros para construir un mapa de c
 \end{figure}
 
 \begin{figure}
-    \caption{Aplicación del mapa de calor reescalado a la imagen \ref{fc-fish}}
+    \caption{Aplicación del mapa de calor reescalado a la imagen de la figura \ref{fc-fish}}
 \label{fc-heatmap}
   \makebox[\textwidth]{\includegraphics[width=\linewidth]{fc-heatmap}}
 \end{figure}
 
 Esto no solo permite comprobar que el modelo funciona correctamente, sino también buscar los ejemplos que peor clasifica y analizar qué está señalando el mapa de calor correspondiente.
 
-Un ejemplo claro de cómo se puede usar esta técnica de visualización para detectar los errores en el modelo es el intento de clasificación un atún de cola amarilla (YFT: \textit{Thunnus albacares}), en la imagen \ref{yft}.
+Un ejemplo claro de cómo se puede usar esta técnica de visualización para
+detectar los errores en el modelo es el intento de clasificación un atún de
+cola amarilla (YFT: \textit{Thunnus albacares}), en la imagen de la figura
+\ref{yft}. Una característica de los atunes de cola amarilla es su banda de
+tonos amarillos en el lomo, característica que el modelo podría haber aprendido
+gracias a los ejemplos. Sin embargo, la imagen muestra el atún visto
+desde abajo, con las aletas abiertas. Esto esconde una de las principales
+características del atún, siendo difícil clasificarlo incluso para un humano no
+familiarizado con atunes.
 
-Una característica de los atunes de cola amarilla es su banda de tonos amarillos en el lomo, característica que el modelo podría haber aprendido gracias a los ejemplos. Sin embargo la imagen \ref{yft} muestra el atún visto desde abajo, con las aletas abiertas. Esto esconde una de las principales características del atún, siendo difícil clasificarlo incluso para un humano no familiarizado con atunes.
+Al mostrar el mapa de calor correspondiente (figura \ref{yft-heatmap}) se puede
+apreciar que la hipótesis de que el modelo ha aprendido a detectar los atunes
+de cola amarilla a través del color podría ser cierta, ya que una de las partes
+más importantes de la foto para el filtro son los pantalones del pescador, de
+un color amarillo fuerte.
 
-Al mostrar el mapa de calor del YFT en la imagen \ref{yft-heatmap} se puede apreciar que la hipótesis de que el modelo ha aprendido a detectar los atunes de cola amarilla a través del color podría ser cierta, ya que una de las partes más importantes de la foto para el filtro son los pantalones del pescador, de un color amarillo fuerte.
-
-Esto pertime tomar ciertas decisiones sobre el entrenamiento del modelo. Por ejemplo, si se ve que la fijación del modelo con el color es un error y es preferible que use otras cosas como formas o texturas, se puede eliminar el color de las imágenes o aumentar los datos usando transformaciones de color que hagan especial hincapié en la varianza del color amarillo.
+Esto permite tomar ciertas decisiones sobre el entrenamiento del modelo. Por
+ejemplo, si se ve que la fijación del modelo con el color es un error y es
+preferible que use otras cosas como formas o texturas, se puede eliminar el
+color de las imágenes o aumentar los datos usando transformaciones de color que
+hagan especial hincapié en la varianza del color amarillo.
 
 \begin{figure}
     \caption{Una imagen correspondiente a la clase ALB: \textit{Thunnus alalunga}}
@@ -652,12 +709,20 @@ Esto pertime tomar ciertas decisiones sobre el entrenamiento del modelo. Por eje
 \section{Modelo con entrada múltiple}
 \label{sec:multi_entry}
 
-Como se vió en el análisis del conjunto de datos (sección \ref{dataset}), hay otras propiedades de las imágenes cuyo uso podría permitir una mejora de los modelos. Por ejemplo, las imágenes están tomadas en diferentes barcos, con diferentes modelos de cámaras. No todas las cámaras generan imágenes del mismo tamaño, por lo que se podría averiguar el barco del que se ha tomado la fotografía por el tamaño de la imagen.
+Como se vió en el análisis del conjunto de datos (sección \ref{dataset}), hay
+otras propiedades de las imágenes cuyo uso podría permitir una mejora de los
+modelos. Por ejemplo, las imágenes están tomadas en diferentes barcos, con
+diferentes modelos de cámaras. No todas las cámaras generan imágenes del mismo
+tamaño, por lo que se podría averiguar el barco del que se ha tomado la
+fotografía por el tamaño de la imagen.
 
-Ya que cada barco suele pescar diferentes tipos de peces con mayor o menor probabilidad, el conocer el tipo de barco puede ser aprovechado por el modelo para balancear las posibilidades de cada categoría dependiendo del tipo de pesca que suela llevar.
+Ya que cada barco suele pescar diferentes tipos de peces con mayor o menor
+probabilidad, el conocer el tipo de barco puede ser aprovechado por el modelo
+para balancear las posibilidades de cada categoría dependiendo del tipo de
+pesca que suela llevar.
 
 La idea no es hacer todo esto a mano, sino entrenar un modelo que tenga en
-cuenta tanto las imágenes como otra información válida, en este caso, cúal es
+cuenta tanto las imágenes como otra información válida; en este caso, cual es
 el tamaño de la imagen. En el conjunto de datos hay diez tamaños diferentes de
 imágenes, las cuales se codificarán en \textit{onehot} para facilitar el
 entrenamiento.  Los diferentes tamaños de las imágenes son los indicados en el
@@ -717,70 +782,74 @@ def build_dense_layers(dropout=0.5):
 
 Usando esta función, añadimos una capa final para la clasificación, cuya entrada
 será la union entre la red densa y la información sobre los tamaños de las
-imágenes. Esta capa deberá clasificar cada imágen usando tanto la información
+imágenes. Esta capa deberá clasificar cada imagen usando tanto la información
 disponible de la red densa como el barco al que pertenece.
 
 \begin{python}
+# Generar las capas de la red
 net = build_dense_layers()
-# Usamos las entradas de las dimensiones de cada elemento
+
+# Usar las entradas de las dimensiones de cada elemento
 size_inputs = Input(len(sizes))
 bn_inputs = BatchNormalization()(size_inputs)
 
-# Unimos ambas entradas en una última capa
+# Unir las dos entradas en una sola capa
 net = merge([net, bn_inputs], 'concat']
-net = Dense(8, activation='softmax')(x)
-return x
+net = Dense(8, activation='softmax')(net)
 
-
+# Crear la red
 dense_model = keras.models.Model(
-    [inp, size_inputs],  # El modelo ahora tiene multi entrada
-    build_dense_layers(0.45)
+    [inp, size_inputs],  # El modelo ahora tiene multientrada
+    net
 )
 \end{python}
 
-Tras construir el modelo con las entradas múltiples y entrenarlo sobre los dos conjuntos de entrenamiento (las imágenes y los tamaños de las imágenes) vemos la evaluación del modelo.
+Tras construir el modelo con las entradas múltiples y entrenarlo sobre los dos
+conjuntos de entrenamiento (las imágenes y los tamaños de las imágenes) vemos
+la evaluación del modelo.
 
 \begin{python}
 dense_model.evaluate(test_feat, test_labels)
 >>> [0.373333961543, 0.941351055711]
 \end{python}
 
-El modelo ha sacado una evaluación peor que modelos anteriores, incluso usando un modelo que ya se conocía con una evaluación superior.
+El modelo ha sacado una evaluación peor que modelos anteriores, incluso usando
+un modelo que ya se conocía con una evaluación superior.
 
 Aunque la idea es buena, lo que está haciendo por debajo es clasificar los
 diferentes barcos en base a los tamaños de sus imágenes. Debido a la amplia
 diferencia de las imágenes de los diferentes tipos de barcos, ya sea por los
 colores, iluminación, objetos, etc, el anterior modelo denso probablemente ya
 esté teniendo en cuenta de qué barco es cada imagen. Por lo tanto lo único que
-va a añadir el introducir estos datos es complejidad del modelo, haciendo más
-difícil converger a una buena solución.
+have el introducir estos datos es añadir complejidad del modelo, haciendo más
+difícil que converja a una buena solución.
 
-El envío de este modelo ha obtenido una puntuación de\textbf{1.0466} en la tabla pública de \textit{Kaggle}, empeorando el anterior envío.
-
-
+El envío de este modelo ha obtenido una puntuación de \textbf{1.0466} en la
+tabla pública de \textit{Kaggle}, empeorando el anterior envío.
 
 \subsection{Fuga de datos}
 
-Esta idea de usar datos diferentes del conjunto de datos para clasificar es algo muy usado en las competiciones de modelos predictivos. No solo funciona el tamaño de la foto, sino a veces las fotos tienen datos adicionales, como información GPS, hora de creación o modelo de cámara.
+En las competiciones de modelos predictivos como \textit{Kaggle} a veces se usan datos no diferentes al conjunto de datos para clasificar. En este caso hemos usado los tamaños de las imágenes, pero podría usarse también información oculta en los metadatos de la imágen, como coordenadas GPS, hora de toma de la fotografía o marca de la cámara. Esto se conoce como \textbf{fuga de datos}.
 
 No todos estos datos son publicados de una manera voluntaria por comunidades de campeonatos, pero son útiles para conseguir una pequeña mejora en el modelo, siempre que el modelo puede aprovecharse de estos datos.
 
 \section{Salida múltiple}
 
-Como vimos anteriormente en la figura \ref{yft-heatmap} la red completamente
+Como vimos anteriormente en la figura \ref{yft-heatmap}, la red completamente
 convolucional es capaz de clasificar correctamente la imagen pero por las
 razones incorrectas: los pantalones amarillos del pescador. Un modelo que sea
-capaz de clasificar la imagen e identificar la localización del pez podría
+capaz de clasificar la imagen identificando la localización del pez podría
 evitar este tipo de errores. Intuitivamente esta idea tiene sentido, ya que es lógico
 buscar primero si hay un pez en la imagen y luego distinguir a qué categoría
 pertenece.
 
 Al usar técnicas de aprendizaje supervisado como las que estamos usando es
-necesario ejemplos resueltos para poder generar un modelo. Si queremos un modelo
-que localice pez en la imagen necesitaremos ejemplos de dicha
-localización para el conjunto de entrenamiento, cosa que el conjunto de datos no posee.
+necesario disponer de ejemplos con respuesta conocida para poder entrenar los
+modelos. Si queremos un modelo que localice peces en las imágenes necesitaremos
+ejemplos con localizaciones conocidas para el conjunto de entrenamiento, cosa
+que el conjunto de datos no posee.
 
-Afortunadamente un usuario ha localizado todos los peces del conjunto de
+Afortunadamente, un usuario ha localizado todos los peces del conjunto de
 entrenamiento en rectángulos y ha publicado un conjunto de datos con las
 coordenadas de los rectángulos que los contienen. Las reglas de la competición
 en \textit{Kaggle} indican que es posible usar conjuntos de datos no oficiales
@@ -814,8 +883,8 @@ altura, anchura y las coordenadas del centro. Algunas imágenes poseen varios
 peces, por lo que la lista de rectángulos puede contener más de un elemento.
 
 Para ilustrar estos rectángulos y comprobar que están señalando la localización
-correctemente se ha pintado un rectángulo con las mismas coordenadas en la
-figura \ref{box}. Se puede observar que captura correctamente la localización
+correctamente se ha pintado un rectángulo con las mismas coordenadas en la
+figura \ref{box}. Se puede observar que captura con precisión la localización
 del pez.
 
 
@@ -828,16 +897,16 @@ del pez.
 
 \subsection{Arquitectura del modelo}
 
-Generar la caja que contiene al pez no es un problema de clasificación, por lo
-que no tiene que distinguir entre diferentres tipos de peces, solo tiene que
-identificar dónde hay uno. Esto favorecerá a que la red busque características
-generales de peces en vez de características generales de cada una de las
+Generar la caja que contiene al pez no es un problema de clasificación, porque
+no tiene que distinguir entre diferentes tipos de peces, solo tiene que
+identificar dónde hay uno. Esto favorecerá que la red busque características
+generales de peces, en vez de características generales de cada una de las
 categorías. Por otro lado, encontrar la clasificación correcta sí que requiere
 buscar características específicas de cada categoría.
 
-Al compartir ambas salidas la misma red hasta la última capa, esta debera
-encontrar un balance entre encontrar características específicas de cada categoría y
-características generales de los peces.
+Al usar la misma red para ambas tareas, esta deberá encontrar un balance entre
+encontrar características específicas de cada categoría y características
+generales de los peces.
 
 Para la creación de la red vamos a seguir el mismo procedimiento que en la
 entrada múltiple (sección \ref{sec:multi_entry}), solo que en vez de añadir la
@@ -861,9 +930,9 @@ codificación \textit{onehot} de las ocho categorías.
 \begin{python}
 # Generar la red sin la capa de salida 
 net = build_dense_layers(dropout)
-# Agregar la capa de salida para la localización
+# Agregar la capa de salida para la localizacion
 net_bb = Dense(4, name='bb')(net)
-# Agregar la capa de salida para la clasificación
+# Agregar la capa de salida para la clasificacion
 net_class = Dense(8, activation='softmax', name='class')(net)
 # Generar el modelo usando la entrada + ambas capas de salida
 model = Model([inp], [net_bb, net_class])
@@ -877,12 +946,15 @@ media del cuadrado de la diferencia entre los valores esperados y los valores
 de la salida. Esto penalizará mucho más los valores lejanos a la salida
 esperada que los pequeños errores.
 
+Ya que el error cuadrático será de una magnitud mayor que la pérdida logarítmica,
+se pondera cada una con diferentes pesos.
+
 \begin{python}
 model.compile(
     Adam(lr=0.001),
     loss=['mse', 'categorical_crossentropy'],
     metrics=['accuracy'],
-    loss_weights=[.001, 1.],
+    loss_weights=[.001, 1.],  # Ponderar los errores
 )
 \end{python}
 
@@ -910,7 +982,7 @@ cada una de las capas de salida.
 conjunto de test}
 \label{eval_multi}
 \begin{tabular}{rrr}
-                       & \textbf{Pérdida logarítimica} & \textbf{Precisión} \\
+                       & \textbf{Pérdida} & \textbf{Precisión} \\
 \textbf{Localización}  & 239.54                        & 0.8454             \\
 \textbf{Clasificación} & 0.2403                        & 0.9698            
 \end{tabular}
@@ -927,7 +999,7 @@ de \textbf{0.8675}, siendo el segundo mejor modelo de los entrenados hasta ahora
 \subsection{Visualización de la localización de peces}
 
 Como se veía en la imagen \ref{box} se puede representar la localización anotada
-en el conjunto de datos de cada imagen. De la misma manera podemos visualizar
+en el conjunto de datos de cada imagen. De la misma manera, podemos visualizar
 los valores de salida de la capa de localización para ver si el modelo es capaz
 de encontrar dónde se encuentra cada pez en la imagen.
 
@@ -940,7 +1012,7 @@ generado por el modelo.
 
 En la segunda imagen el modelo ha sido capaz de identificar un pez, pero no el que
 se le había indicado en el conjunto de entrenamiento. El pez que ha localizado
-está más visible y mejor iluminado, por lo que es más fácil de localizar. El pez
+es más visible y está mejor iluminado, por lo que es más fácil de localizar. El pez
 original está parcialmente tapado por la cabeza de un pescador.
 
 \begin{figure}
@@ -958,15 +1030,15 @@ original está parcialmente tapado por la cabeza de un pescador.
 \section{Modelos \textit{ensemble}}
 
 En competiciones de modelos predictivos es habitual que la mejor puntuación
-no la obtenga un único modelo, sino un modelo generado a partir de varios. Este
+no la obtenga un único modelo, sino un modelo construido combinando varios. Este
 tipo de modelos se conocen como \textit{ensemble models} (modelos de conjunto).
 
-Para generar estos modelos no es necesario reentrenar los modelos disponibles, sino
-trabajar con las salidas de estos. Primero generamos las predicciones de cada
-modelo que queremos unir. Luego generamos una predicción del modelo
-\textit{ensemble} uniendo los valores de las predicciones usando un sistema de
-votación o una media aritmética ponderada. Hay otros métodos de generar modelos
-\textit{ensemble} más sofisticados, pero aquí se van a tratar los más simples:
+Para generar estos modelos no es necesario reentrenar los modelos disponibles,
+sino trabajar con las salidas de estos. Primero calculamos las predicciones de
+cada modelo que queremos combinar. Luego generamos una predicción del modelo
+\textit{ensemble} agregando los valores de las predicciones. Hay otros métodos
+para construir modelos \textit{ensemble} más sofisticados, pero aquí se van a
+considerar únicamente los más simples:
 
 \begin{itemize}
     \item{\textbf{Votación:} La salida de cada modelo se entiende como una
@@ -979,7 +1051,7 @@ votación o una media aritmética ponderada. Hay otros métodos de generar model
             entre los valores de los modelos. La ponderación de la media permite
             dar preferencia al modelo con más confianza.
             
-            En el cuadro \ref{ensemble_sample} podemos ver un ejemplo de como
+            En el cuadro \ref{ensemble_sample} podemos ver un ejemplo de cómo
         sería la salida de un modelo \textit{ensemble} ejemplo usando una media
     aritmética entre tres modelos diferentes.}
 
@@ -1027,11 +1099,11 @@ están compuestos de tres modelos anteriores:
     \item{Modelo con salida múltiple}
 \end{itemize}
 
-Estos tres modelos son los que mejores resultados obvtuvieron en la
-clasificación, así que se usarán para generar dos modelos. El primero usará la
-media aritmética de la salida mientras que el segundo será ponderado de la
-siguiente manera: 25 \% para el clasificador denso, 25 \% para el modelo con
-salida múltiple y 50 \% para el modelo completo convolucional.
+Estos tres modelos son los que mejores resultados obtuvieron previamente, así
+que se usarán para generar dos modelos. El primero usará la media aritmética de
+la salida mientras que el segundo será ponderado de la siguiente manera: 25 \%
+para el clasificador denso, 25 \% para el modelo con salida múltiple y 50 \%
+para el modelo completo convolucional.
 
 Al evaluar estos modelos en \textit{Kaggle}, los resultados de la tabla pública
 son los siguientes
@@ -1041,22 +1113,36 @@ son los siguientes
     \item{Media ponderada favoreciendo el modelo completo convolucional: \textbf{0.8975}
 \end{itemize}
 
-Las puntuaciones de ensemble, que tradicionalmente suelen conseguir las mejores posiciones en las competiciones de kaggle, no han conseguido ser las mejores.
+Desafortunadamente las puntuaciones de \textit{ensemble}, que tradicionalmente suelen conseguir las mejores posiciones en las competiciones de \textit{Kaggle}, no han conseguido ser las mejores.
 
 \section{Modelos finales presentados}
 
-En los cuadros \ref{model_id} y \ref{final_scores} hay un resumen de los
-modelos presentados con sus puntuaciones.
+En los cuadros \ref{model_id} y \ref{final_scores} se presenta un resumen de
+los modelos presentados, junto a sus puntuaciones.
 
-Las reglas de la competición establecen que solo es posible puntuar dos modelos en la tabla de puntuaciones privada y solo es posible usar un modelo para la segunda fase.
+Las reglas de la competición establecen que solo es posible puntuar dos modelos
+en la tabla de puntuaciones privada y solo es posible usar un modelo para la
+segunda fase.
 
-El mejor modelo según las puntuaciones públicas de la primera fase es el que usa un clasificador convolucional en las últimas capas, seguido del que usa una salida múltiple para intentar clasificar los peces. Hay que recordar que estas puntuaciones se calculan usando un subconjunto del conjunto de test, por lo que puede cambiar cuando se publique la tabla privada.
+El mejor modelo según las puntuaciones públicas de la primera fase es el que
+usa un clasificador convolucional en las últimas capas, seguido del que usa una
+salida múltiple para intentar clasificar los peces. Hay que recordar que estas
+puntuaciones se calculan usando un subconjunto del conjunto de test, por lo que
+puede cambiar cuando se publique la tabla privada.
 
-Tradicionalmente los modelos ensemble consiguen mejores puntuaciones en las competiciones de \textit{Kaggle}, por lo que se ha decidido enviar un modelo ensemble (el tercero en mejor puntuación) y el convolucional completo.
+Tradicionalmente los modelos \textit{ensemble} consiguen mejores puntuaciones
+en las competiciones de \textit{Kaggle}, por lo que se ha decidido enviar un
+modelo \textit{ensemble} (el tercero en mejor puntuación) y el convolucional
+completo.
 
-Al publicarse las puntuaciones privadas, vemos en el cuadro \ref{final_scores} que el modelo convolucional consigue mejor puntuación, así que es seleccionado como el modelo final a enviar.
+Al publicarse las puntuaciones privadas, vemos en el cuadro \ref{final_scores}
+que el modelo convolucional consigue mejor puntuación, así que es seleccionado
+como el modelo final a enviar.
 
-La puntuación final de este modelo es de \textbf{0.907} en la tabla pública y \textbf{1.998} en la privada, consiguiendo una posición 210 de 2293 participantes y una medalla de bronce (por clasificar dentro del mejor 10 \% de los participantes).
+La puntuación final de este modelo es de \textbf{0.907} en la tabla pública y
+\textbf{1.998} en la privada, consiguiendo una posición 210 de 2293
+participantes y una medalla de bronce (por clasificar dentro del mejor 10 \% de
+los participantes).
 
 \begin{table}[]
 \centering
