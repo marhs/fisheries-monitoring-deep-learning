@@ -73,9 +73,16 @@ artificial a la hora de identificar y generalizar elementos de una imagen. En
 esta competición se deben detectar elementos en 150000 fotografías y
 clasificarlos en una entre 1000 categorías diferentes.
 
-En 2010 y 2011 los modelos ganadores consiguieron una tasa de error de un 28,2 \% y un 25.8 \%, respectivamente. En 2012, el modelo presentado en \parencite{krizhevsky2012imagenet} ganó con una tasa de error 16.4 \%, superando en casi un 10 \% al segundo clasificado. Esta victoria hizo que el enfoque de esta propuesta haya sido usado por los ganadores de los años siguientes.
+En 2010 y 2011 los modelos ganadores consiguieron una tasa de error de un 28,2 \% y un 25.8 \%, respectivamente. En 2012, el modelo presentado en \parencite{krizhevsky2012imagenet}, una red convolucional profunda, ganó con una tasa de error del 16.4 \%, superando en casi un 10 \% al segundo clasificado. Esta victoria hizo que el enfoque de esta propuesta haya sido usado por los ganadores de los años siguientes.
 
-La figura \ref{general-architecture} representa la red convolucional profunda usada en ILSVRC 2012, la cual se compone de una red convolucional para la extracción de características de la imagen seguida de una red densa para la clasificación de la imagen usando sus características extraídas.
+En este trabajo se pretende aprovechar la capacidad de generalización de los modelos ganadores del ILSVRC. Es decir, no se construirá una red convolucional con una estructura similar a la de \parencite{krizhevsky2012imagenet}, sino que se utilizará esa misma red adaptándola a nuestro problema.
+
+\subsection{Red convolucional}
+
+La figura \ref{general-architecture} representa la red usada en ILSVRC 2012, la
+cual se compone de una red convolucional para la extracción de características
+de la imagen, seguida de una red densa para la clasificación de la imagen
+usando esas características extraídas.
 
 \begin{figure}
   \caption{Arquitectura de una red convolucional profunda. Consta de una acumulación de capas convolucionales destinadas a extraer características de la entrada y una serie de capas densas para clasificar la entrada usando dichas características.}
@@ -83,27 +90,39 @@ La figura \ref{general-architecture} representa la red convolucional profunda us
   \makebox[\textwidth]{\includegraphics[width=\linewidth]{imagenet-arch}}
 \end{figure}
 
-La idea no es solo usar la arquitectura de este tipo de redes, sino también sus entrenamientos. ILSVRC debe clasificar entre 1000 categorías diferentes, por lo que necesita poder generalizar mucho a la hora de extraer características de las imágenes. Para aplicar esto al reconocimiento de peces, extraeremos las características de las imágenes y usaremos otro modelo para clasificar en nuestras ocho categorías usando estas características. De esta manera podremos aprovechar la potencia de este tipo de redes con modificaciones adaptadas a nuestro problema.
+Como explicamos en la sección \ref{sec:conv-net}, cuando una red convolucional
+recibe una imagen devuelve $N$ matrices bidimensionales representando el
+resultado de la aplicación de los $N$ conjuntos de filtros a la imagen inicial.
+Intuitivamente podemos pensar que la salida de cada uno de estos filtros
+representa la aparición en la imagen de la característica que esté detectando
+el filtro. Necesitamos entonces que en las últimas capas la red aprenda
+filtros que se activen sólo con la aparición de una clase de pez.
 
-\subsection{Red convolucional}
+Un detalle que debemos tener en cuenta que este modelo convolucional no ha sido entrenado con el conjunto de entrenamiento del problema, sino con el conjunto de entrenamiento de \cite{imagenet}. Por lo tanto, nuestro uso de esta red convolucional será únicamente para transformar cada imagen del conjunto de entrenamiento del problema a un conjunto de características.
 
-Como explicamos en el capítulo~\ref{sec:conv-net}, cuando un modelo convolucional recibe una imagen devuelve $N$ matrices bidimensionales representando el resultado de la aplicación de los $N$ conjuntos de filtros a la imagen inicial. Al tener todas esas $N$ matrices bidimensionales las mismas dimensiones también pueden considerarse como una única matriz tridimensional.
+La arquitectura del artículo original \parencite{krizhevsky2012imagenet} usa
+capas convolucionales donde alterna filtros de $11\times11$, $5\times5$ y
+$3\times3$, el cual parece una buena elección para usar como modelo
+convolucional preentrenado. Sin embargo, la aplicación de este trabajo es una
+competición internacional donde se usarán soluciones \textit{state of the art}.
+El modelo de la figura \ref{general-architecture} representa el ganador de la
+edición 2012 de la competición ILSVRC, hace ya cinco años, por lo que resulta
+conveniente analizar cuales fueron los ganadores de años posteriores.
 
-Intuitivamente podemos pensar que la salida cada uno de estos filtros representa la aparición en la imagen de la característica que esté detectando el filtro. En los filtros más cercanos al final de la red, esta podría generar filtros que se activen sólo con la aparición de una clase de pez.
+El modelo principal que usaremos es VGG, desarrollado por el \textit{Visual
+Geometry Group}, de la Universidad de Oxford \parencite{simonyan}. Es un modelo
+especialmente interesante por su simplicidad, aparte de obtener una de las
+mejores puntuaciones en ILSVRC 2014. Una de las principales características de
+VGG es la idea de que los filtros convolucionales mayores de $3\times3$, como
+por ejemplo los de $5\times5$ u $11\times11$, pueden ser representados por
+combinaciones de filtros $3\times3$.
 
-Hay que tener en cuenta que este modelo convolucional no ha sido entrenado con el conjunto de entrenamiento del problema, sino con el conjunto de entrenamiento de \parencite{imagenet}. Por lo tanto, esta red convolucional va a ser usada para transformar cada imagen del conjunto de entrenamiento del problema a un conjunto de características.
-
-\subsection{Modelo preentrenado}
-\label{sec:vgg}
-
-La arquitectura del artículo original \parencite{krizhevsky2012imagenet} usa capas convolucionales donde alterna filtros de $11\times11$, $5\times5$ y $3\times3$, el cual parece una buena elección para usar como modelo convolucional preentrenado. Sin embargo, la aplicación de este trabajo es una competición internacional donde se usarán soluciones \textit{state of the art}. El modelo de la figura \ref{general-architecture} representa el ganador de la edición 2012 de la competición ILSVRC, por lo que resulta conveniente analizar los modelos ganadores de años posteriores.
-
-El modelo principal a usar es VGG, desarrollado por el \textit{Visual Geometry Group}, de la Universidad de Oxford. Es un modelo especialmente interesante por su simplicidad, aparte de obtener una de las mejores puntuaciones en ILSVRC 2014.
-
-
-Una de las principales características de VGG es la idea de que los filtros convolucionales mayores de $3\times3$, como por ejemplo los de $5\times5$ u $11\times11$ pueden ser representados por combinaciones de filtros $3\times3$.
-
-De las configuraciones descritas en \parencite{simonyan} hay una que sobresale por su eficiencia, llamada VGG16. Usando un total de trece capas CONV con filtros de $3\times3$, cinco capas POOL y tres capas FC (de 4096, 4096 y 1000 salidas), seguida de una función \textit{softmax} (figura \ref{vgg16-arch}), es capaz de mejorar la eficacia del modelo de Krizhevsky. El nombre de esta configuración es VGG16, ya que es la cantidad de capas CONV y FC que posee.
+De las configuraciones descritas en \parencite{simonyan} hay una que sobresale
+por su eficiencia, llamada VGG16. Usando un total de trece capas CONV con
+filtros de $3\times3$, cinco capas POOL y tres capas FC (de 4096, 4096 y 1000
+salidas), seguida de una función \textit{softmax} (figura \ref{vgg16-arch}), es
+capaz de mejorar la eficacia del modelo de Krizhevsky. El nombre de esta
+configuración es VGG16, por ser esta la cantidad de capas CONV y FC que posee.
 
 \begin{figure}
   \caption{Arquitectura de VGG}
@@ -113,13 +132,30 @@ De las configuraciones descritas en \parencite{simonyan} hay una que sobresale p
 
 \subsection{Ajuste fino}
 
-Si observamos la última capa del modelo VGG16, vemos que la salida tiene 1000 elementos. Tiene esta forma ya que ILSVRC consiste en clasificar una imagen entre mil categorías diferentes. Como en nuestro problema solo tenemos ocho categorías, es lógico modificar esta última capa para que únicamente tenga ocho salidas.
+Si observamos la última capa del modelo VGG16, vemos que la salida tiene 1000
+elementos. Tiene esta forma ya que ILSVRC consiste en clasificar una imagen
+entre mil categorías diferentes. Como en nuestro problema solo tenemos ocho
+categorías, es lógico modificar esta última capa para que únicamente tenga ocho
+salidas.
 
-Al modificar la estructura de la última capa estamos destruyendo pesos y haciendo que muchos de los que ya existían carezcan de sentido. El hecho de que VGG tenga esta separación lógica entre la red convolucional y la red densa (las tres capas FC) hace que se pueda separar el modelo en dos submodelos diferentes: uno convolucional, que no habrá cambiado con la adaptación a las ocho categorías, y otro denso, que tendrá que ser entrenado de nuevo.
+Al modificar la estructura de la última capa estamos destruyendo pesos y
+haciendo que muchos de los que ya existían carezcan de sentido. El hecho de que
+VGG una esta separación lógica entre la red convolucional y la red densa hace
+que se pueda separar el modelo en dos submodelos diferentes: uno convolucional,
+que no habrá cambiado con la adaptación a las ocho categorías, y otro denso,
+que tendrá que ser entrenado de nuevo.
 
-Al dividir la red en dos subredes diferentes hay que tener en cuenta que la segunda, la red densa, no recibe como entrada las imágenes, sino la salida de la primera red convolucional, con todas las transformaciones que esta produce. Es necesario entonces aplicar la red convolucional a todo el conjunto de datos para crear un nuevo conjunto de datos con el que reentrenar la red densa.
+Esta técnica de ajustar los parámetros de un modelo ya conocido para adaptarlo
+a un nuevo conjunto de datos se conoce como ajuste fino (\textit{fine-tuning}).
+En la figura \ref{basic_architecture} se puede ver un resumen de las diferentes
+etapas por los que pasa la red.
 
-Esta técnica de ajustar los parámetros de un modelo ya conocido para adaptarlo a un nuevo conjunto de datos se conoce como ajuste fino (\textit{fine-tuning}). En la figura \ref{basic_architecture} se puede ver un resumen de las diferentes etapas por los que pasa la red.
+Al dividir la red en dos subredes diferentes hay que tener en cuenta que la
+segunda, la red densa, no recibe como entrada las imágenes, sino la salida de
+la primera red convolucional, con todas las transformaciones que esta produce.
+Es necesario entonces aplicar la red convolucional a nuestro conjunto de datos
+de entrenamiento para crear un nuevo conjunto de datos con el que reentrenar la
+red densa.
 
 \begin{figure}
   \caption{Estructura del modelo final. Como recibe como entrada imágenes de 244 píxeles, pasa por las diferentes redes y devuelve el vector de ocho categorías.}
@@ -127,54 +163,44 @@ Esta técnica de ajustar los parámetros de un modelo ya conocido para adaptarlo
   \makebox[\textwidth]{\includegraphics[width=.7\linewidth]{basic_architecture}}
 \end{figure}
 
-
-Usando el conjunto de datos definido en el capítulo \ref{sec:metodology}, con la separación 60 \%, 20 \% y 20 \% para los conjuntos de entrenamiento, validación y test se ha entrenado la red densa.
-
-Primero es necesaria la transformación del conjunto en las características producidas por la red convolucional.
+El siguiente código (simplificado) realiza esta tarea para los subconjuntos
+locales de entrenamiento, validación y prueba.
 
 \begin{python}
 # Carga del modelo VGG16
 from vgg16 import Vgg16
 model = Vgg16()
 
-# Diferencia entre red convolucional y densa
+# Separacion entre red convolucional y densa
 import utils
 conv_model, dense_model = utils.split_at(model, MaxPooling2D)
 
-# Cargamos los diferentes conjuntos de datos
+# Carga de los diferentes conjuntos de datos
+#  'path' es la carpeta donde se encuentra los
+#  conjuntos de datos
 train, train_labels = get_data(path + 'train')
 valid, valid_labels = get_data(path + 'valid')
 test, test_labels = get_data(path + 'test')
 
-# Convertir dataset a features mediante la red convolucional
+# Conversion a caracteristicas mediante la red convolucional
 train_feat = conv_model.predict(train)
 valid_feat = conv_model.predict(valid)
 test_feat = conv_model.predict(test)
-\end{python}
 
-Este código no es completamente válido, ya que se han tomado algunas libertades para mejorar la comprensión y lectura del mismo. Define una estructura general a seguir para este problema (carga de datos, transformación, \textit{fine-tuning} y evaluación). Para una mayor comprensión el la mayor parte de las librerías usadas así como las utilidades están descritas en el Apéndice 1.
-
-TODO (cuando lo pase a LaTex)
-
-Una vez cargadas las librerías necesarias (Vgg16 es una clase abstracta que importa las bibliotecas necesarias de Keras), ambos modelos y transformado el dataset mediante la red convolucional se puede pasar a reentrenar la última parte de la red. Primero hay que cambiar el final de la red para conseguir que tenga ocho salidas y luego entrenar.
-
-
-\begin{python}
-
-# Cambiar el final de la red densa de 1000 outputs a 8
-dense_model.pop()  # Elimina la capa final
+# Sustitucion de la capa de salida
+dense_model.pop()  # Eliminar la capa final
 dense_model.add(
     Dense(8, activation='softmax')  # Introducir una nueva capa
 )
 
-# Compilar el modelo
+# Compilacion del modelo
 dense_model.compile(
-    SGD(lr=0.01),
+    SGD(lr=0.01),  # Factor de aprendizaje
     loss='categorical_crossentropy',
     metrics=['accuracy'],  # Muestra la precision del modelo
 )
 
-# Entrenar la red
+# Entrenamiento de la red
 dense_model.fit(
     train_feat,
     train_labels,
@@ -189,24 +215,42 @@ dense_model.evaluate(test_feat, test_labels)
 >>> [1.90571456890184755, 0.66099843993759748]
 \end{python}
 
-La puntuación total para este conjunto de test sería $1.906$. Esto es sobre un conjunto de test muy pequeño, solo el 20 \% del conjunto de entrenamiento. 
+La puntuación total para el conjunto de test local sería 1.906. 
 
-El segundo número que devuelve la función $evaluate$ es la precisión ($accuracy$) del modelo. Al ser el modelo un modelo de clasificación, el usar $"accuracy"$ como métrica al compilar el modelo hace devuelva el porcentaje de veces que la clase con la probabilidad máxima se corresponde con la clase etiquetada en el conjunto de datos. En este caso el modelo ha clasificado correctamente el 66 \% de las imágenes, un número muy aceptable teniendo en cuenta que solo se ha tocado la capa final de un modelo ajeno.
+El segundo número que devuelve la función $evaluate$ es la precisión
+($accuracy$) del modelo. Al ser este un modelo de clasificación, la precisión
+es el porcentaje de veces que la clase con la probabilidad máxima se
+corresponde con la clase etiquetada en el conjunto de datos. En este caso la
+red ha clasificado correctamente el 66 \% de las imágenes, un número muy
+aceptable teniendo en cuenta que solo se ha tocado la capa final de un modelo
+ajeno.
 
-Al subir la predicción del conjunto de test a \textit{kaggle} se obtiene una puntuación de \textbf{2.632} en la clasificación pública, mediante la pérdida logarítmica. Hay que recordar que esta puntuación se calcula usando un subconjunto del conjunto de test, así que la puntuación de este modelo puede cambiar en la segunda fase.
+Al subir la predicción del conjunto de test a \textit{kaggle} se obtiene una
+puntuación de \textbf{2.632} en la clasificación pública, mediante la pérdida
+logarítmica. Hay que recordar que esta puntuación se calcula usando un
+subconjunto del conjunto de test, así que la puntuación de este modelo puede
+cambiar en la segunda fase.
 
+Al subir a \textit{Kaggle} las predicciones del modelo sobre el conjunto de
+prueba de la primera fase de la competición se obtuvo una puntuación de pérdida
+logarítimica de 2.632. Aunque el error ha aumentado sensiblemente esto es
+perfectamente normal, ya que las imágenes proporcionadas al modelo son
+completamente nuevas.
 
 \section{Modelo completamente conectado}
 \label{sec:model_connected}
 
-La idea original que se comentaba al principio consistía en separar el problema en el modelo convolucional y el modelo de clasificación. Es en el segundo donde se puede conseguir toda la flexibilidad.
-
-El modelo original de VGG usa dos capas $densas$ de 4096 neuronas para clasificar entre mil clases diferentes. Ya que este problema tiene solo ocho clases diferentes probablemente no sea necesario usar capas tan grandes, por lo que se procede a probar la misma estructura original pero con capas cuatro veces más pequeñas que las originales.
+El modelo original de VGG usa dos capas $densas$ de 4096 neuronas para
+clasificar entre mil clases diferentes. Ya que nuestro problema tiene solo ocho
+clases diferentes probablemente no sea necesario usar capas tan grandes, por lo
+que se procede a probar la misma estructura original, pero con capas cuatro
+veces más pequeñas que las originales.
 
 La estructura, por lo tanto, quedaría de la misma manera pero usando dos capas
-densas de 512 neuronas cada una y una capa densa final de 8 (figura \ref{standard_arch}). Para no tener que
-estar modificando el modelo original cada vez que haga falta es mucho más
-sencillo crear un modelo nuevo con $Keras$ y añadir todas las capas necesarias.
+densas de 512 neuronas cada una y una capa densa final de 8 (figura
+\ref{standard_arch}). Para no tener que estar modificando cada vez el modelo
+original cada vez que haga falta es mucho más sencillo crear un modelo nuevo
+con $Keras$ y añadir todas las capas necesarias.
 
 \begin{figure}
   \caption{}
@@ -214,7 +258,7 @@ sencillo crear un modelo nuevo con $Keras$ y añadir todas las capas necesarias.
   \makebox[\textwidth]{\includegraphics[width=.9\linewidth]{standard_arch}}
 \end{figure}
 
-
+Un paso importante a la hora de construir el modelo personalizado es tener en cuenta que las salidas de las redes convolucionales poseen tres dimensiones ($ancho \times alto \times filtros$), mientras que la redes neuronales densas poseen solo una dimensión. Es necesario convertir la salida de estas capas a una entrada permitida. \textit{Keras} ya ofrece esta posibilidad usando una capa abstracta llamada \textit{Flatten}.
 
 \begin{python}
 def list_dense_layers():
@@ -226,27 +270,31 @@ def list_dense_layers():
     ]
 
 dense_model = keras.models.Sequential(list_dense_layers())
-\end{python}
 
-Un paso importante a la hora de construir el modelo personalizado es tener en cuenta que las salidas de las redes convolucionales poseen tres dimensiones ($ancho \times alto \times filtros$), mientras que la redes neuronales densas poseen solo una dimensión. Es necesario convertir la salida de estas capas a una entrada permitida. \textit{Keras} ya ofrece esta posibilidad usando una capa abstracta llamada \textit{Flatten}.
-
-\begin{python}
 # Entrenar la red
 dense_model.compile(...)
 dense_model.fit(...)
+
 # Evaluar el modelo sobre el conjunto de test
 dense_model.evaluate(test_feat, test_labels)
 >>> [1.27161316430079874, 0.73067862714508579]
 \end{python}
 
-Los resultados obtenidos son ligeramente mejores que los anteriores, sin embargo no es aquí donde está toda la mejora. El entrenamiento de este modelo ha sido un 80\% más rápido que el anterior (19.5 segundos por iteración en el primero, 3.9 segundos en este último). Esto no solo ha permitido entrenar la red durante más tiempo, sino que en el futuro hará posible entrenar sobre mayores cantidades de datos sin aumentar el tiempo de entrenamiento.
+Los resultados obtenidos son ligeramente mejores que los anteriores. Sin
+embargo no es aquí donde está toda la mejora. El entrenamiento de este modelo
+ha sido un 80\% más rápido que el anterior (19.5 segundos por iteración en el
+primero, 3.9 segundos en este último). Esto no solo ha permitido entrenar la
+red durante más tiempo, sino que en el futuro hará posible entrenar sobre
+mayores cantidades de datos sin aumentar excesivamente el tiempo de entrenamiento.
 
 La puntuación en la tabla pública de \textit{Kaggle} para este modelo ha sido
 de \textbf{2.381}.
 
-\subsection{Mejorar el modelo}
+\subsection{Análisis del sobreajuste}
 
-La salida de Keras al entrenar el modelo ofrece información de lo que está sucediendo. Este es un ejemplo de la salida del entrenamiento del modelo anterior.
+La salida de \textit{Keras} al entrenar el modelo ofrece información de lo que
+está sucediendo. Este es un ejemplo de la salida del entrenamiento del modelo
+anterior.
 
 \begin{python}
 Epoch 5/7
@@ -266,18 +314,20 @@ Cuando un modelo tiene demasiados parámetros y ha sido entrenado durante demasi
 
 Los datos del modelo anterior indican que puede existir un sobreajuste, por lo que se va a intentar tomar medidas para arreglarlo.
 
-\subsection{Dropout}
+\subsection{\textit{Dropout}}
 \label{sec:dropout}
 
-Una de las características de VGG y otras redes convolucionales es el uso de \textit{dropout} para reducir el sobreajuste de los modelos entrenados. El \textit{dropout} consiste en una capa que se aplica después de las capas de activación. Esta capa convierte activaciones aleatorias a 0, eliminando la información transportada (Figura \ref{dropout-net})
+Una de las características de VGG y otras redes convolucionales es el uso de
+\textit{dropout} para reducir el sobreajuste de los modelos entrenados. El
+\textit{dropout} consiste en una capa que se aplica después de las capas de
+activación de las capas densas. Esta capa convierte activaciones aleatorias a
+0, eliminando la información transportada (Figura \ref{dropout-net})
 
 \begin{figure}
     \caption{A la izquierda una red neuronal estándar con dos capas ocultas. A la derecha la misma red aplicando un \textit{dropout} en cada una de las capas ocultas. Las neuronas tachadas han perdido su activación.}
 \label{dropout-net}
   \makebox[\textwidth]{\includegraphics[width=0.7\linewidth]{dropout-net}}
 \end{figure}
-
-
 
 En un principio parecería que esto perjudica al modelo, pero al eliminar algunos de los pesos el modelo evita centrarse en características individuales de cada ejemplo de clasificación, obligándolo a generalizar más rápido \parencite{dropout}.
 
@@ -289,12 +339,17 @@ Un pequeño experimento en un modelo más avanzado (VGG con \textit{batch normal
   \makebox[\textwidth]{\includegraphics[width=0.7\linewidth]{dropout}}
 \end{figure}
 
-
 También se ve que el modelo empieza a perder eficacia a partir del 70 \% de \textit{dropout}, empeorando el modelo original. Esto significa que el modelo es capaz de generalizar con información útil incluso cuando solo posee el 30 \% de las activaciones.
 
-Por otra parte, también es importante pensar dónde se pierden las activaciones. Por un lado, perder demasiadas activaciones en la entrada sería el equivalente a trabajar sin esos ejemplos. Por otro, perderlos en la salida sería aumentar demasiado el error al clasificar, al no tener tanta capacidad de apoyo en las otras capas.  La idea aplicada aquí es distribuir el \textit{dropout} disminuyéndolo en la entrada y la salida y haciendo que tenga su punto máximo en el centro de la red.
+Por otra parte, también es importante pensar dónde se pierden las activaciones.
+Por un lado, perder demasiadas activaciones en la entrada sería el equivalente
+a trabajar sin esos ejemplos. Por otro, perderlos en la salida sería aumentar
+demasiado el error al clasificar, al no tener tanta capacidad de apoyo en las
+otras capas.  La idea aplicada aquí es distribuir el \textit{dropout}
+disminuyéndolo en la entrada y la salida y haciendo que alcance máximo
+en el centro de la red.
 
-La definición de la red anterior quedaría de la siguiente manera:
+El modelo modificado quedaría de la siguiente manera:
 
 \begin{python}
 def list_dense_layers(dropout):
