@@ -1,0 +1,157 @@
+% Appendix A
+
+\chapter{\textit{Keras}} 
+\label{ap:keras}
+
+\textit{Keras} es una API escrita en \textit{Python} para el desarrollo de
+redes neuronales capaz de ejecutarse en sistemas como \textit{TensorFlow} o
+\textit{Theano}. Fue desarrollada con la idea de permitir una experimentación
+sencilla y un desarrollo rápido con redes neuronales. Posee soporte para redes
+neuronales recurrentes y convolucionales, así como combinaciones de ambas.
+También es capaz de aprovechar la GPU para acelerar el entrenamiento de las
+redes.
+
+
+\section{Instalación} 
+
+Para la instalación de \textit{Keras} primero es necesario instalar uno de los
+diferentes \textit{frameworks} con los que \textit{Keras} trabaja: \textit{Theano} o
+\textit{TensorFlow}. En este caso se ha trabajado con \textit{Theano}, ya que
+es un sistema más antiguo y que dispone de más documentación. Para la
+instalación se usará \textit{Conda}, un gestor de paquetes para
+\textit{Python}. Otros métodos de instalación y posibles soluciones a problemas
+se pueden encontrar en la documentación de \textit{Theano} \parencite{theano}.
+
+\begin{python}
+>>> conda install theano pygpu
+\end{python}
+
+Una vez instalado \textit{Theano} es necesario instalar \textit{Keras}, también
+usando \textit{Conda}.
+
+\begin{python}
+>>> conda install keras
+\end{python}
+
+
+\section{Uso} 
+
+El uso de la herramienta se puede divivir en tres partes: generación de la red
+neuronal, carga del conjunto de datos y entrenamiento y evaluación del modelo.
+Aquí se explicarán las partes más usadas en este trabajo, pero es posible
+obtener una descripción más precisa en la documentación de \textit{Keras}
+\parencite{keras_doc}.
+
+\subsection{Arquitectura}
+
+Lo más importante del uso de \textit{Keras} es ser capaz de definir la
+arquitectura de la red. Para ello existe la clase \texttt{Sequential}. Esta
+clase representa un conjunto lineal de capas dentro de la red. Como ya hicimos
+en la sección \ref{sec:model_connected}, vamos a crear un objeto
+\texttt{Sequential} pasando las capas de las que se compondrá la red mediante
+objetos.
+
+\begin{python}
+from keras.models import Sequential
+red_neuronal = Sequential([
+    Dense(512, activation='relu'),
+    Dense(512, activation='relu'),
+    Dense(8, activation='softmax')
+    ])
+\end{python}
+
+Existen muchos tipos de objetos capa, cada uno representando una variación de
+un concepto diferente en la red neuronal. Algunos de los usados en este trabajo
+son los siguientes:
+
+\begin{itemize}
+    \item{\texttt{Dense}: Capa densa, complemtamente conectada. Las capas usadas en las redes neuronales clásicas.}
+    \item{\texttt{Convolution2D}: Capa convolucional. Existen con 1, 2 ó 3 dimensiones.
+    \item{\texttt{Dropout}: Aplicación de dropout (sección \ref{sec:dropout}) a la salida de la capa anterior.}
+    \item{\texttt{MaxPooling2D}: Capa de muestreo. Elige la mayor de cada cuatro entradas que entren.
+    \item{\texttt{BatchNormalization}: Capa de normalización por lotes.
+\end{itemize}
+
+Cada capa incluye el tamaño de salida de la capa y una función de activación,
+que debe indicarse en el parámetro \texttt{activation}.
+
+Por último, para terminar de crear la red, hay que configurar el aprendizaje de
+esta. Esto se hace usando la utilidad \texttt{compile}, que necesita tres
+parámetros:
+
+\begin{itemize}
+    \item{Optimizador: Mecanismo de optimización, como por ejemplo SGD (descenso de gradiente estocástico).}
+    \item{Función de pérdida: Este es el objetivo que el modelo tratará de minimizar. En nuestro caso será \textit{\texttt{'logloss'}}, la pérdida logarítmica.}
+    \item{Métricas: Las diferentes métricas que queremos que muestre en la evaluación, además de la función de pérdida}
+\end{itemize}
+
+
+\begin{python}
+red_neuronal.compile(
+    optimizer='rmsprop',
+    loss='categorical_crossentropy',
+    metrics=['accuracy'],
+)
+\end{python}
+
+\subsection{Carga de datos}
+
+Para este proyecto hemos tenido que cargar grandes cantidades de imágenes.
+Keras necesita los datos de entrenamiento como matrices de la biblioteca
+numérica \textit{numpy}, sin embargo las imágenes están en formato
+\textit{jpg}.
+
+La utilidad para convertir imágenes a matrices se llama
+\texttt{ImageDataGenerator}. Lo interesante de esta utilidad es que no solo
+permite leer archivos y convertirlos, sino que lo hace como un generador. Un
+generador en \textit{Python} va devolviendo más elementos a medida que estos son
+consumidos. Esto evita tener que generar todos las matrices al mismo tiempo y
+cargarlas en memoria. También permite aplicar otras transformaciones a la
+imagen para crear un aumento de datos.
+
+\begin{python}
+from keras.preprocessing.image import ImageDataGenerator
+base_generator = ImageDataGenerator(featurewise_center=False,
+    samplewise_center=False,
+    featurewise_std_normalization=False,
+    samplewise_std_normalization=False,
+    zca_whitening=False,
+    zca_epsilon=1e-6,
+)
+\end{python}
+
+Una vez configurada la herramienta hay que llamarla en el directorio sobre el que se quiere actuar.
+
+\begin{python}
+image_generator = base_generator.flow_from_directory(
+    'data/train',
+    target_size=(150, 150),
+    batch_size=32,
+)
+\end{python}
+
+\subsection{Entrenamiento y evaluación}
+
+El entrenamiento del modelo se realiza con la función \texttt{fit}. Es
+necesario proveer a la función de los ejemplos de entrada con sus salidas
+esperadas (\texttt{data} y \texttt{labels} en nuestro ejemplo). Se le indica
+también el número de iteraciones a realizar.
+
+\begin{python}
+data, labels = image_generator.flow_from_directory(...)
+red_neuronal.fit(data, labels, epochs=10, batch_size=32)
+\end{python}
+
+Esto actualizará los pesos de la red para minimizar la función de pérdida
+indicada. Una vez finalizado podemos hacer una evaluación del modelo usando
+otro conjunto de datos (generalmente el de test) con la función
+\texttt{evaluate}. Esta función devolverá la pérdida del modelo sobre el
+conjunto más el resto de métricas que se hayan definido.
+
+\begin{python}
+red_neuronal.evaluate(test_data, test_labels)
+>>> [1.90571456890184755 , 0.66099843993759748]
+\end{python}
+
+Para una mayor compresión de como usar esta librería es mejor dirigirse a la documentación \parencite{keras_doc}.
+
