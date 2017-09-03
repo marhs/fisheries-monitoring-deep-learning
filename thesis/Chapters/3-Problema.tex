@@ -4,71 +4,18 @@
 
 \label{Chapter5} % Change X to a consecutive number; for referencing this chapter elsewhere, use \ref{ChapterX}
 
-\section{Kaggle}
-
-En el año 2007, \textit{Netflix} creó una competición para mejorar su motor de
-recomendación de películas. Publicó un conjunto de datos las películas elegidas
-por los diferentes usuarios y pidió a los participantes realizar un modelo
-predictivo usando este conjunto de datos. Evaluaron los modelos predictivos
-presentados usando un conjunto de datos diferente y otorgaron el premio al que
-menos error presentaba. El premio para el mejor modelo predictivo era de un
-millón de dólares.
-
-En 2010 el economista australiano Anthony Goldbloom, inspirándose en la idea de
-la competición de Netflix, creó \textit{Kaggle}. \textit{Kaggle} es una
-plataforma de competiciones de análisis y modelización predictiva de datos.
-
-El funcionamiento de la plataforma consiste en lo siguiente: un equipo promotor
-contacta con \textit{Kaggle} y prepara un conjunto de datos para la competición.
-Un subconjunto de esos datos son publicados en la web para el uso de los
-participantes. El otro subconjunto, oculto, se usa para determinar el mejor
-modelo presentado y declarar un ganador.
-
-El conjunto de datos presentado contiene las respuestas de cada elemento
-(permitiendo así que los modelos usen aprendizaje supervisado). Junto a los
-datos se especifica una métrica que servirá para medir la bondad del modelo.
-
-Para presentar el modelo el participante debe presentar las predicciones del
-conjunto de test en la web de \textit{Kaggle}. La puntuación obtenida según la
-métrica sobre una parte del conjunto de test se hará pública en la tabla de
-posiciones pública. Cuando la competición termina se genera una tabla de
-posiciones privada, donde se publica a la puntuación del modelo usando el
-conjunto de test completo, y es con esta puntuación con la que se determina el
-ganador. Se hace de esta manera para evitar que los participantes sobreajusten
-el modelo al conjunto de test.
-
-Existen varios tipos de competiciones a las que los usuarios se pueden
-presentar:
-
-\begin{itemize}
-  \item \textit{\textbf{Getting started}}: Competiciones sencillas organizadas por la
-      misma plataforma con la finalidad de que los usuarios se familiaricen con
-      los modelos predictivos y la estructura de las competiciones. Suelen tener
-      un conjunto de datos ordenado y sencillo, y existe mucha documentación y
-      ayuda en los foros.
-  \item \textit{\textbf{Playground}}: Competiciones que no resuelven problemas
-      reales, diseñadas para que los usuarios experimenten y prueben diferentes
-      ideas. No tienen ningún premio.
-  \item \textit{\textbf{Research}}: El objetivo de estas competiciones es la
-      investigación sobre diferentes técnicas o de problemas de bien común.
-      Muchas de estas competiciones tienen como premio la invitación a
-      conferencias o a publicar los resultados en algún medio. Suelen requerir
-      que las soluciones sean publicadas como código abierto.
-  \item \textit{\textbf{Recruiting}}: Los organizadores de estas competiciones
-      buscan contratar a los mejores participantes.
-  \item \textit{\textbf{Featured}}: Las competiciones con más dificultad y
-      mejores premios. Buscan resolver un problema real y posiblemente
-      comercial. Aquí entraría la competición de Netflix.
-\end{itemize}
-
-A principios de 2017 \textit{Kaggle} fué comprado por \textit{Google}, aunque por ahora sigue siendo una
-plataforma independiente funcionando bajo su propio nombre.
-
 \section{\textit{The Nature Conservancy Fisheries Monitoring }}
 
-En el océano pacífico, donde se captura más del 60\% del atún del mundo, tienen lugar prácticas de pesca irregular que amenazan a los ecosistemas marinos y a la estabilidad de la pesca mundial. \textit{The Nature Conservancy} es una asociación que trabaja con organizaciones locales y globales para preservar las especies marinas de cara al futuro.
+En el océano Pacífico, donde se captura más del 60\% del atún del mundo, tienen
+lugar prácticas de pesca irregular que amenazan a los ecosistemas marinos y a
+la estabilidad de la pesca mundial. \textit{The Nature Conservancy} es una
+asociación que trabaja con organizaciones locales y globales para preservar las
+especies marinas de cara al futuro.
 
-La principal idea para controlar la pesca y explotación de recursos marinos es el uso de cámaras en barcos, que ayudan a monitorizar las actividades pesqueras de estos. Aunque funciona muy bien como sistema de control, la cantidad de datos e imágenes generadas hace que sea muy costoso de procesar manualmente.
+La principal idea para controlar la pesca y explotación de recursos marinos es
+el uso de cámaras en barcos, que ayudan a monitorizar las actividades pesqueras
+de estos. Aunque funciona muy bien como sistema de control, la cantidad de
+datos e imágenes generadas hace que sea muy costoso de procesar manualmente.
 
 \begin{figure}
   \centering
@@ -77,11 +24,20 @@ La principal idea para controlar la pesca y explotación de recursos marinos es 
   \includegraphics[width=\textwidth]{kaggle-competition-banner}
 \end{figure}
 
-La idea de este reto es desarrollar algoritmos que detecten y clasifiquen automáticamente especies de atunes, tiburones y otras especies que estos barcos pesqueros cazan. El que se pueda analizar imágenes como las de la figura \ref{kaggle-banner} de una manera rápida y automática permitirá asignar recursos de una manera mucho más efectiva para el control de este tipo de actividades \parencite{kaggle-page}.
+La idea de este reto es desarrollar algoritmos que detecten y clasifiquen
+automáticamente especies de atunes, tiburones y otras especies que estos barcos
+pesqueros cazan. El que se pueda analizar rápida y automáticamente imágenes
+como las de la figura \ref{kaggle-banner} permitirá asignar recursos de una
+manera mucho más efectiva para el control de este tipo de actividades
+\parencite{kaggle-page}.
 
 \section{Definición del problema}
 
-El problema consiste en clasificar cada una de las imágenes de un conjunto de imágenes de barcos en una de las ocho categorías disponibles. Las imágenes suelen mostrar la cubierta de un barco donde puede aparecer un pez. En base al pez que aparezca hay que clasificarlo en una de las seis categorías mostradas en la figura:
+El problema consiste en clasificar cada una de las imágenes de un conjunto de
+imágenes de barcos en una de las ocho categorías disponibles. Las imágenes
+suelen mostrar la cubierta de un barco donde puede aparecer un pez. En base al
+pez que aparezca hay que clasificarlo en una de las seis categorías mostradas
+en la figura \ref{kaggle-fishes}.
 
 \begin{figure}
   \centering
@@ -90,7 +46,7 @@ El problema consiste en clasificar cada una de las imágenes de un conjunto de i
   \includegraphics[width=\textwidth]{species-ref-key}
 \end{figure}
 
-En caso de que no aparezca ningún pez en la imagen, esta tendrá la categoría NOF (\textit{No Fish}). Y si aparece un pez en la imagen pero no perteneciente a ninguna de las categorías mencionadas, la categoría será OTHER.
+En caso de que no aparezca ningún pez en la imagen, esta tendrá la categoría NOF (\textit{No Fish}). Y si aparece un pez en la imagen no perteneciente a ninguna de las categorías mencionadas, la categoría será OTHER.
 
 En resumen, el conjunto de posibles categorías es:
 \[
@@ -111,7 +67,7 @@ La competición proporciona tres ficheros con los que trabajar:
 \subsection{Envío de la solución y evaluación}
 \label{sec:envio-y-eval}
 
-Para el envío de la solución hace falta clasificar las 1000 imágenes del conjunto de evaluación, indicando la probabilidad de que caiga en cada una de las ocho categorías diferentes. En la tabla \ref{submission-sample} se muestra un ejemplo de una fila del archivo CSV a enviar.
+Para el envío de la solución hace falta clasificar las 1000 imágenes del conjunto de evaluación, indicando la probabilidad de que pertenezca a cada una de las ocho categorías diferentes. En el cuadro \ref{submission-sample} se muestra un ejemplo de una fila del archivo CSV a enviar.
 
 \begin{table}[]
 \centering
@@ -123,7 +79,7 @@ img\_00005.jpg & 0.455 & 0.052 & 0.030 & 0.0173 & 0.123 & 0.079 & 0.046 & 0.194\
 \end{tabular}
 \end{table}
 
-Los resultados enviados se evalúan mediante una función de pérdida logarítmica multiclase. Concretamente se usa la fórmula:
+Los resultados enviados se evalúan mediante una función de pérdida logarítmica multiclase. Concretamente se usa la fórmula
 \[
   logloss =
   - \frac{1}{N} \sum_{i=1}^N \sum_{j=1}^M y_{ij} \log \, p_{ij}
@@ -133,22 +89,28 @@ Los resultados enviados se evalúan mediante una función de pérdida logarítmi
  pertenece y $p_{ij}$ la probabilidad predicha de que el elemento $i$ pertenezca
  a la categoría $j$.
 
- \subsection{Leaderboard y fases de la competición}
+ Cuanto menor sea el valor obtenido, mejor se habrá comportado el modelo sobre el conjunto de prueba.
 
-Cuando un participante envía una predicción, \textit{Kaggle }calcula la puntuación de dicho envío sobre un subconjunto del conjunto de test, mostrando la puntuación en una tabla de clasificación pública. Se usa un subconjunto para enviar que los participantes puedan aprovechar un sobreajuste a la hora de entrenar el modelo. Al llegar a la fecha de entrega de las predicciones y modelos se recalculará esta tabla con todo el conjunto de test.
+\subsection{Tablas de clasificación y fases de la competición}
+
+Cuando un participante envía una predicción, \textit{Kaggle} calcula la
+puntuación de dicho envío sobre un subconjunto de ejemplos compuesto del 8 \%
+del conjunto de test, mostrando la puntuación en una tabla de clasificación
+pública. Se usa un subconjunto para evitar que los participantes puedan
+aprovechar un sobreajuste a la hora de entrenar el modelo.
 
 Antes de terminar la primera fase de la competición los participantes deberán subir a \textit{Kaggle} el modelo utilizado y seleccionar las dos predicciones que quieren usar para la puntuación con el conjunto completo. La puntuación de estas predicciones se hará usando todo el conjunto de test y se publicará en una tabla de clasificación privada, solo visible para los participantes. 
 
 Una vez terminada la primera fase, \textit{Kaggle} publicará un nuevo conjunto de test, con el que los participantes deberán clasificar usando el modelo entregado al final de la fase anterior.
 
-En esta segunda fase, que dura solo cinco días, el procedimiento es el mismo. Se publicarán puntuaciones usando un subconjunto del segundo conjunto de test y al terminar se publicará la puntuación usando el conjunto completo. Esta última puntuación será la puntuación final de la competición. Si alguno de los participantes ha hecho un envío en la primera fase pero no ha hecho ninguno en la segunda, quedará eliminado de la competición.
+En esta segunda fase, que dura solo cinco días, el procedimiento es el mismo. Se publicarán puntuaciones usando un subconjunto del segundo conjunto de test y al terminar se publicará la puntuación usando el resto del conjunto. Esta última puntuación será la puntuación final de la competición. Si alguno de los participantes ha hecho un envío en la primera fase pero no ha hecho ninguno en la segunda, quedará eliminado de la competición.
 
-\section{El conjunto de datos}
+\subsection{Conjunto de entrenamiento}
 \label{dataset}
 
-El conjunto de datos que se provee en la competición consta de 3777 imágenes,
-divididas en ocho categorías. La figura \ref{histogram} muestra la cantidad de
-imágenes pertenecientes a cada categoría.
+El conjunto de datos de entrenamiento proporcionado en la competición consta de
+3777 imágenes, divididas en ocho categorías. La figura \ref{histogram} muestra
+la cantidad de imágenes pertenecientes a cada categoría.
 
 \begin{figure}
   \centering
@@ -182,36 +144,32 @@ usar características del barco en el que se encuentran los peces si mostramos
 variaciones del mismo pez con el mismo fondo.}
 
 \item{Se puede obsevar que en algunas imágenes los peces son muy difíciles de
-identificar, debido a que están parcialmente ocultos, la imagen está oscura o la
-cámara está sucia. Recordemos que algunas de las categorías son diferentes
-familias de atunes, bastante parecidos en forma entre ellos. Distinguir entre
-dos familias de atunes en una imagen oscura y con el atún parcialmente oculto
-puede llegar a ser imposible para un humano.}
+        identificar, debido a que están parcialmente ocultos, la imagen está
+        oscura o la cámara está sucia. Recordemos que algunas de las categorías
+        son diferentes familias de atunes, con formas bastante parecidas.
+    Distinguir entre dos familias de atunes en una imagen oscura y con el atún
+parcialmente oculto puede llegar a ser imposible para un humano.}
 
 \item{Algunas imágenes están mal etiquetadas. Si el modelo predice la clase
-        incorrecta de la imagen con mucha confianza, le asignará poca
-        probabilidad a la clase correcta. Una probabilidad cercana a cero hará
-        que la pérdida logarítmica aumente mucho.
-        \[
-        \lim_{x \to 0}log(x)=\infty
-        \]
+        incorrecta de la imagen (según su etiqueta) con mucha confianza, le
+        asignará poca probabilidad a la clase correcta. Una probabilidad
+        cercana a cero hará que la pérdida logarítmica aumente mucho.
 }
 
 \subsection{Conjuntos de test}
 
-Para el envío de predicciones es necesario clasificar el conjunto de test que
-se provee en cada una de las fases de la competición. En la primera fase el
-conjunto de test consta de 1000 imágenes para clasificar, mientras que en la
-segunda consta de 13000.
+Para el envío de predicciones es necesario clasificar cada imagen del conjunto
+de test que se proporciona en cada una de las fases de la competición. En la
+primera fase el conjunto de test consta de 1000 imágenes para clasificar,
+mientras que en la segunda consta de 13000.
 
 No se ha realizado ningún tipo de inspección o exploración de ninguno de los
-conjuntos de test, más allá de la inspección técnica (formatos y archivos) para
-evitar cualquier tipo de sesgo a la hora de crear el modelo. El segundo conjunto
-de test no se hizo público hasta seis días antes de terminar la competición, por
-lo que era imposible saber que tipo de imágenes iba a contener. Una exploración
-del primer conjunto de test podría haber hecho que se sobreajustara el modelo a
-este conjunto, empeorando la puntuación para el siguiente conjunto si este era
-diferente.
+conjuntos de test para evitar cualquier tipo de sesgo a la hora de crear el
+modelo. El segundo conjunto de test no se hizo público hasta seis días antes de
+terminar la competición, por lo que era imposible saber qué tipo de imágenes
+iba a contener. Una exploración del primer conjunto de test podría haber hecho
+que se sobreajustara el modelo a este conjunto, empeorando la puntuación para
+el siguiente conjunto si este era diferente.
         
 \end{itemize}
 
