@@ -16,20 +16,38 @@ resultados. Por otra parte, el conjunto de test de la segunda fase tiene más de
 modelo. En determinados casos la evaluación del segundo conjunto de test ha
 tardado más de 6 horas.
 
-La solución a este problema se ha resuelto usando un subconjunto del conjunto de entrenamiento dedicado solo a la evaluación de modelos. Por otra parte, para el entrenamiento es necesario usar un subconjunto de validación, por lo tanto es necesario dividir el conjunto de entrenamiento original en tres subconjuntos: entrenamiento, validación y test.
+La solución a este problema se ha resuelto usando un subconjunto del conjunto
+de entrenamiento dedicado solo a la evaluación de modelos. Por otra parte, para
+el entrenamiento es necesario usar un subconjunto de validación, por lo tanto
+es necesario dividir el conjunto de entrenamiento original en tres
+subconjuntos: entrenamiento, validación y test. La partición se ha realizado
+dejando un \textbf{60 \%} de los datos al conjunto de entrenamiento, un
+\textbf{20 \%} al conjunto de validación y un \textbf{20 \%} al conjunto de
+test.
 
-La partición se ha realizado dejando un \textbf{60 \%} de los datos al conjunto de entrenamiento, un \textbf{20 \%} al conjunto de validación y un \textbf{20 \%} al conjunto de test.
+Otra posibilidad sería emplear la metodología de validación cruzada, que
+consiste en dividir el conjunto de entrenamiento en $n$ partes, usando $n-1$ de
+ellas para el entrenamiento y la restante para la validación. Esto se repite
+$n$ veces, considerando en cada una de ellas uno de los subconjuntos como
+conjunto de validación. La bondad del modelo será el valor medio de todos los
+modelos generados. No obstante, en los algoritmos de redes convolucionales con
+imágenes no se suele usar la validación cruzada, ya que son algoritmos muy
+costosos y puede aumentar mucho el tiempo de entrenamiento.
 
-Se puede probar a hacer validación cruzada, que consiste en dividir el conjunto de entrenamiento en n partes, usar n-1 para el entrenamiento y la restante para la validación. Esto se repite n veces, usando cada partición como conjunto de validación. La bondad del modelo será el valor medio de todos los modelos generados. En los algoritmos de redes convolucionales con imágenes no siempre se usa la validación cruzada, ya que son algoritmos muy costosos y puede aumentar mucho el tiempo de entrenamiento.
+\subsection{Partición del conjuntos de datos} 
 
-\subsection{Partición del conjuntos de datos}
-La partición del conjunto de datos es una operación delicada. Ya vimos que uno de los problemas del conjunto de datos era que la cantidad de imágenes para cada clase era muy variada, teniendo algunas clases un número muy bajo de ejemplos. Si seleccionamos aleatoriamente el 40 \% de las imágenes, es posible que no se elijan ejemplos de una o varias de las categorías, con lo que los modelos construidos no las tendrían en cuenta.
+La partición de un conjunto de datos es una operación delicada. Ya vimos que
+uno de los problemas de nuestro conjunto de datos de entrenamiento era que la
+cantidad de imágenes para cada clase era muy variada, teniendo algunas de ellas
+un número muy bajo de ejemplos. Si seleccionamos aleatoriamente el 40 \% de las
+imágenes, es posible que no se elijan ejemplos de una o varias de las
+categorías, con lo que los modelos construidos no las tendrían en cuenta.
 
-La solución adoptada ha sido realizar un muestreo estratificado, seleccionando aleatoriamente el 20\% de los ejemplos de cada clase.
+La solución adoptada ha sido realizar un muestreo estratificado para realizar la partición del conjunto de datos. Este consiste en realizar la partición de cada clase por separado, siguiendo la proporción 60 \% - 20 \% - 20 \% indicada anteriormente.
 
 \subsection{Evaluación del modelo}
 
-Para una búsqueda más óptima de parámetros y configuraciones el modelo se evaluará contra el grupo de test generado. Una vez se encuentren determinados modelos especialmente interesantes por tener una puntuación máxima local entre aquellos a los que se compara habrá que enviarlo a \textit{Kaggle} para su evaluación completa.
+Para una búsqueda más eficiente de parámetros y configuraciones los modelos se evaluarán previamente usando nuestro subconjunto de test local. Aquellos modelos especialmente interesantes por tener una puntuación máxima local entre aquellos a los que se compara habrá que enviarlo a \textit{Kaggle} para su evaluación completa.
 
 \textit{Kaggle} usa la pérdida logarítmica para medir la bondad de cada modelo (sección 
 \ref{sec:envio-y-eval}). Esta métrica hace que si puntuamos con una probabilidad muy baja la categoría correcta de la imagen, la métrica se vea perjudicada (como se describió en \ref{problemas}).
@@ -39,7 +57,7 @@ Un truco para solventar posibles problemas generados a partir de esta métrica e
 
 \subsection{Software}
 
-Todos los modelos de redes convolucionales que se van a entrenar en este proyecto han sido entrenados usando Keras
+Todos los modelos de redes convolucionales que se van a entrenar en este proyecto han sido entrenados usando Keras sobre cuadernos de \textit{iPython}. La estructura de desarrollo y algunas utilidades están descritas en \parencite{fastai} y \parencite{felixyu}.
 
 
 \section{Idea}
@@ -184,6 +202,7 @@ Al subir la predicción del conjunto de test a \textit{kaggle} se obtiene una pu
 
 
 \section{Modelo completamente conectado}
+\label{sec:model_connected}
 
 La idea original que se comentaba al principio consistía en separar el problema en el modelo convolucional y el modelo de clasificación. Es en el segundo donde se puede conseguir toda la flexibilidad.
 
@@ -253,6 +272,7 @@ Cuando un modelo tiene demasiados parámetros y ha sido entrenado durante demasi
 Los datos del modelo anterior indican que puede existir un sobreajuste, por lo que se va a intentar tomar medidas para arreglarlo.
 
 \subsection{Dropout}
+\label{sec:dropout}
 
 Una de las características de VGG y otras redes convolucionales es el uso de \textit{dropout} para reducir el sobreajuste de los modelos entrenados. El \textit{dropout} consiste en una capa que se aplica después de las capas de activación. Esta capa convierte activaciones aleatorias a 0, eliminando la información transportada (Figura \ref{dropout-net})
 
@@ -332,7 +352,7 @@ dense_model = keras.models.Sequential(list_dense_layers(0.45))
 
 Esto no es suficiente. A diferencia del \textit{dropout}, la normalización por lotes sí que es capaz de mejorar la red convolucional del modelo preentrenado. Gracias a la popularidad de esta técnica y de los modelos preentrenados que se usan en este trabajo, ya existen entrenamientos del modelo VGG original usando normalización por lotes, ahorrando la necesidad de entrenar una red tan grande. Una descripción de esto entrenamientos se puede encontrar en \parencite{pretrained_with_bn}.
 
-En el caso de este trabajo se ha adaptado bajo la clase $Vgg16BN$. (TODO cita a howar) Al cambiar la red convolucional original hay que volver a transformar el conjunto de datos que se usaba para obtener los resultados de aplicar los filtros actualizados sobre las imágenes de entrada.
+En el caso de este trabajo se ha adaptado bajo la clase $Vgg16BN$, siguiendo los principios descritos en \parencite{fastai}. Al cambiar la red convolucional original hay que volver a transformar el conjunto de datos que se usaba para obtener los resultados de aplicar los filtros actualizados sobre las imágenes de entrada.
 
 \begin{python}
 # Carga del modelo VGG16 con normalizacion por lotes
@@ -498,7 +518,7 @@ sido de \textbf{0.8109}.
 
 El trabajar en todo momento (salvo en la última capa= con redes convolucionales, implica que los pesos son siempre filtros que se aplican a imágenes. Se pretende entonces conseguir filtros que resalten la existencia en cada zona de la imagen de un pez de una determinada clase.
 
-Se pueden usar los diferentes valores de los filtros para construir un mapa de calor para la categoría que le corresponde. Un mapa de calor es una representación gráfica de los valores de una matriz bidimensional. Generalmente valores pequeños se asocian a colores más claros,como el azul o el verde, y valores mayores a colores más cálidos, como el rojo o el morado.  Si se redimensiona el filtro (ya que ha sido reducido por las capas de MaxPooling2D) al tamaño de la imagen original se puede ver cómo encuentra el pez a clasificar en cada imagen, tal y como se muestra por ejemplo en la figura 4.8.
+Se pueden usar los diferentes valores de los filtros para construir un mapa de calor para la categoría que le corresponde. Un mapa de calor es una representación gráfica de los valores de una matriz bidimensional. Generalmente valores pequeños se asocian a colores más claros,como el azul o el verde, y valores mayores a colores más cálidos, como el rojo o el morado.  Si se redimensiona el filtro (ya que ha sido reducido por las capas de \textit{MaxPooling2D}) al tamaño de la imagen original se puede ver cómo encuentra el pez a clasificar en cada imagen, tal y como se muestra por ejemplo en la figura 4.8.
 
 \begin{figure}
     \caption{Una imagen correspondiente a la clase ALB: \textit{Thunnus alalunga}}
