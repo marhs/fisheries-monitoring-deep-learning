@@ -138,7 +138,7 @@ Para mostar la utilidad de los filtros, los aplicaremos a la imagen de un dígit
   \includegraphics{seven}
 \end{figure}
 
-Si aplicamos el filtro F a la imagen de la figura \ref{seven} podemos observar cómo resalta en blanco los bordes superiores y en negro los inferiores. Véase la primera columna de la figura \ref{filters}. Filtros similares, rotando los valores del filtro F, son capaces de resaltar bordes laterales u oblicuos (resto de columnas de la figura \ref{filters}.
+Si aplicamos el filtro F a la imagen de la figura \ref{seven} podemos observar cómo resalta en blanco los bordes superiores y en negro los inferiores. Véase la primera columna de la figura \ref{filters}. Filtros similares, rotando los valores del filtro F, son capaces de resaltar bordes laterales u oblicuos (resto de columnas de la figura \ref{filters}).
 
 \begin{figure}
     \centering
@@ -150,10 +150,13 @@ Si aplicamos el filtro F a la imagen de la figura \ref{seven} podemos observar c
 Lo interesante de este método es que hemos conseguido resaltar características
 del objeto representado en la imagen usando solo operaciones matriciales.
 
-Las matrices de convolución pueden ser de mayor tamaño, permitiendo capturar características más complejas. La matriz de 3$\times$3 es la menor matriz que permite definir en su totalidad el concepto de espacio, pudiendo extraer características espaciales en dos dimensiones.
+Las matrices de convolución pueden ser de mayor tamaño, permitiendo capturar
+características más complejas. La matriz 3$\times$3 es la menor matriz que
+permite definir en su totalidad el concepto de espacio, pudiendo extraer
+características espaciales en dos dimensiones.
 
 A la hora de trabajar con imágenes en color es necesario aplicar cada filtro a
-cada capa por separado, permitiendo de esta manera detectar diferentes
+cada capa del modelo RGB por separado, permitiendo de esta manera detectar diferentes
 características de la imagen que ocurran solo en uno de los colores.
 
 Para analizar cómo afectan diferentes filtros a una imagen, en la página \parencite{visualizer_convolution} se pueden probar ejemplos con filtros personalizados, haciendo el concepto mucho más sencillo de comprender.
@@ -161,7 +164,7 @@ Para analizar cómo afectan diferentes filtros a una imagen, en la página \pare
 \section{Redes neuronales convolucionales}
 \label{sec:conv-net}
 
-Hemos explorado la idea de que determinados filtros son capaces de extraer información localizada sobre características de la imagen. En el ejemplo del apartado anterior, dada una imagen podíamos saber si había bordes superiores y dónde se podían encontrar. Esto puede ser de gran utilidad en el campo de reconocimiento de imágenes, ya que podemos usar esa información localizada para categorizar o aplicar otro tipo de técnicas en esas áreas señaladas. El problema radica en encontrar los mejores filtros para que extaigan las características más relevantes de una imagen.
+Hemos explorado la idea de que determinados filtros sean capaces de extraer información localizada sobre características de la imagen. En el ejemplo del apartado anterior, dada una imagen podíamos saber si había bordes superiores y dónde se podían encontrar. Esto puede ser de gran utilidad en el campo del reconocimiento de imágenes, ya que podemos usar esa información localizada para categorizar o aplicar otro tipo de técnicas en esas áreas señaladas. El problema radica en encontrar los mejores filtros para que extraigan las características más relevantes de una imagen.
 
 Analizando cómo funcionan los filtros convolucionales vemos su parecido con las redes neuronales. Al igual que estas, los filtros se pueden entender como funciones que al aplicarse a los datos de entrada producen unos datos de salida que serán más o menos relevantes para el objetivo buscado. El entrenamiento de una red neuronal va modificando los pesos de las diferentes capas hasta que produce una salida relevante para cada ejemplo del conjunto de entrenamiento. Si entendemos los pesos como matrices convolucionales, podemos hacer que sea la propia red la que busque el mejor filtro para nuestro problema de clasificación. De hecho, ya que las redes neuronales son capaces de componer diferentes funciones en diferentes capas de la red para aprender funciones no lineales, podemos aplicar la misma idea a las redes con filtros: componer diferentes filtros para poder extraer características más complejas.
 
@@ -188,7 +191,10 @@ Las capas convolucionales son las que hemos visto hasta ahora. Tendrán como pes
 \subsubsection{Capa de activación - RELU \textit{(Rectifier Linear layer)}}
 \label{sec:relu}
 
-Al igual que en las redes clásicas es necesario tratar la salida de la aplicación de los pesos sobre las entradas con una función de activación. 
+Al igual que en las redes clásicas es necesario tratar la salida de la
+aplicación de los pesos sobre las entradas con una función de activación. En el
+caso de las redes convolucionales la función de activación se aplica a cada
+píxel resultante del filtro.
 
 La manera habitual de modelizar la salida de una neurona en las RNAs es a
 través de $f(x) = tanh(x)$ o $f(x) = (1 + e^{-x})^{-1}$ (función sigmoide). A
