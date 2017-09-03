@@ -1,7 +1,6 @@
 % Chapter 1
 
 \chapter{Introducción} % Main chapter title
-
 \label{Chapter1} % For referencing the chapter elsewhere, use \ref{Chapter1} 
 
 %----------------------------------------------------------------------------------------
@@ -12,19 +11,27 @@
 \newcommand{\code}[1]{\texttt{#1}}
 \newcommand{\file}[1]{\texttt{\bfseries#1}}
 \newcommand{\option}[1]{\texttt{\itshape#1}}
-
 %----------------------------------------------------------------------------------------
 
-\section{Notas sobre la redacción}
 
-Aparte de darle un repaso general a la escritura y añadir algunos esquemas para que queden más claras algunas arquitecturas e ideas, las partes que me faltan son las siguientes (lo dejo aquí para recordarme que lo tengo que hacer):
+Una de las ventajas de las nuevas tecnologías es la cantidad de datos que son
+capaces de generar para problemas específicos. Donde antes existía una
+necesidad de una persona recolectando datos de forma manual ahora existen
+maneras de automatizar ese proceso. Este trabajo es uno de esos procesos.
 
-\begin{itemize}
-    \item{Intruducción}
-    \item{Conclusiones}
-    \item{Apéndice explicando el uso de Keras para el deep learning}
-\end{itemize}
+La competición propuesta a través de la plataforma \textit{Kaggle} que se
+quiere resolver aquí tiene como objetivo clasificar peces dentro de imágenes de
+barcos pesqueros. Esto permitirá en un futuro predecir patrones migratorios,
+estudiar patrones de pesqua o vigilar que la pesca sea una actividad que no
+dañe al medio ambiente. Sin embargo es necesario encontrar un sistema que
+permita distinguir diferentes peces tal y como lo haría un humano.
 
+El desarrollo de redes neuronales convolucionales en arquitecturas de
+aprendizaje profundo está consiguiendo precisiones similares a la humana en
+problemas de reconocimiento visual \parencite{taigman}. Esto hace que sea cada
+vez más interesante aplicar este tipo de soluciones a problemas de
+clasificación visual donde antes no era posible.
 
-
+En este trabajo se intentarán aplicar técnicas de aprendizaje profundo para
+resolver este problema, variando arquitecturas y usando redes preentrenadas. 
 
