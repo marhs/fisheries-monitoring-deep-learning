@@ -3,19 +3,88 @@
 \chapter{Conclusiones} % Main chapter title
 \label{chap:conclusiones} % For referencing the chapter elsewhere, use \ref{Chapter1} 
 
-Se ha demostrado que con arquitecturas simples, usando modelos preentrenados y disponibles abiertamente, se pueden crear modelos que son capaces de extraer características de imágenes complejas y clasificar objetos que aparecen en ellas. 
+El objetivo principal de este trabajo era afrontar un problema real en una de
+las competiciones \textit{\textbf{featured}} de \textit{Kaggle}, incluso
+aspirar a conseguir un premio.
+
+Ha sido un trabajo muy interesante, ya que he aprendido las dificultades
+de la implementación de redes de aprendizaje profundo en problemas del
+mundo real. Esto requiere enfrentarse a problemas que no aparecen en la teoría.
+
+Los tres principales problemas han sido los siguientes:
+
+\begin{itemize}
+    \item{\textbf{Cómo afrontar el problema:}
+     Hasta el momento había leído bastante sobre
+    técnicas de reconocimiento visual usando herramientas fijas que permitían poca
+    soltura y por supuesto sin usar ningún tipo de aprendizaje automático.
+
+    Esto se solucionó gracias a la gran comunidad de participantes de
+    \textit{Kaggle}. Es de esperar que en una competición con buenos premios
+    existan reticencias a ayudar al resto de participantes, pero resultó ser al
+    revés. Hay una comunicación permanente en los foros de la competición de las
+    técnicas que se están usando, referencias, lecturas, etc. Quiero destacar aquí
+    las aportaciones de Felix Yu \parencite{felixyu} y de Jeremy Howard
+    \parencite{fastai}. Incluso publicando después de haber terminado la
+    competición he entendido otros pasos a seguir que estaba perdiendo. }
+
+    \item{\textbf{Trabajar con grandes cantidades de datos:}
+    Los 13000 ejemplos de la segunda fase de la competición hicieron que muchos de
+    mis modelos no funcionasen, ya que la máquina se quedaba sin suficiente memoria
+    RAM. Esto me hizo tener que \textbf{cuidar la gestión de memoria}, saber
+    descargar datos cuando no se están usando y guardar cálculos en disco para no
+    tener que repetirlos.  }
+
+    \item{\textbf{Automatización de procesos:}
+    La segunda fase de la competición tenía un conjunto de datos de prueba
+    desconocido que iba a tener que ser clasificado por un modelo fijo. Esto
+    hizo tener que automatizar toda la parte del tratamiento de datos para el
+    problema.  }
+
+\end{itemize}
+
+La conclusión principal que saco de este trabajo es la potencia de las redes
+convolucionales. Han mejorado cualquier expectativa que tenía sobre el reconocimento
+de imágenes y es posible que vayan a convertirse en la base de la visión artificial
+en el futuro.
+
+Creo que se pueden abordar muchos problemas diferentes de clasificación de
+imágenes usando una arquitectura común que use las modificaciones
+realizadas en este problema (\textit{dropout}, normalización por lotes, aumento
+de datos, etc).
 
 \section{Kaggle}
 
-La competición ha sido la primera de este organizador, \textit{The Nature Conservancy}. Esto se ha notado en diferentes detalles. La comunicación en el foro de la plataforma no ha sido del todo fluida, lo cual ha provocado algunos errores que no tenían que haberse cometido. El más destacado ha sido la descalifiación del ganador, que modificó el modelo en la segunda fase de la clasificación.
+Participar en esta competición de Kaggle ha sido divertido y didáctico ya que,
+aunque hubiera una competición por un premio, los participantes siempre han
+estado dispuestos a ayudarse entre ellos. Creo que dedicarle tiempo a una
+competición tiene sus recompensas, independientemente si se gana o no el premio.
 
-Por otro lado, dejar a los participantes 3777 imágenes poco variadas (como ya vimos en el análisis de los datos) y usar 14000 para el test ha hecho que sea especialmente difícil generar un buen modelo. Un ejemplo de esto es que el archivo de ejemplo de envío, que contiene en cada elemento la misma predicción (la proporción de ejemplos de cada categoría, normalizado) haya conseguido medalla de plata, acabando en la posición 33.
+Por otro lado, he notado que a la organización promotora (\textit{The Nature
+Conservancy}) le falta un poco de experiencia en \textit{Kaggle}. Esto se ha
+notado en diferentes detalles. La comunicación en el foro de la plataforma no
+ha sido del todo fluida, lo cual ha provocado algunos errores que no tenían que
+haberse cometido, como por ejemplo descalificación del mejor clasificado.
 
-\section{Puntuación final}
+Otro ejemplo es la falta de diversidad del conjunto de datos de entrenamiento.
+Era muy difícil extraer información de determinados peces con muy poca información,
+haciendo complicado hacer modelos que generalizaran correctamente.
 
-Aunque se le haya dado varias vueltas a usar las capas densas como clasificadores finales del modelo, el ganador ha sido el que no las usa: el modelo completamente convolucional. Creo que esto puede ser debido a que es capaz de, en esas últimas capas convolucionales, detectar elementos más generales de la imagen, descartando así el ruido que pueden producir los fondos de la imagen.
+Un ejemplo de esto es que el archivo de ejemplo de envío (sección
+\ref{submission-sample}), que contiene en cada elemento la misma predicción (la
+proporción de ejemplos de cada categoría, normalizado) haya conseguido medalla
+de plata, acabando en la posición 33.
 
-\section{Pasos a seguir}
+\subsection{Puntuación final}
+
+Aunque se le haya dado varias vueltas a usar las capas densas como
+clasificadores finales del modelo, el ganador ha sido el que no las usa: el
+modelo completamente convolucional. Creo que esto puede ser debido a que es
+capaz de, en esas últimas capas convolucionales, detectar elementos más
+generales de la imagen, descartando así el ruido que pueden producir los fondos
+de la imagen.
+
+\section{Siguientes pasos}
 
 Las siguientes mejoras de este problema creo que vienen reduciendo el ruido generado por todos los elementos de las imágenes que no son peces. Para esto habría primero que recortar automáticamente los peces de las imágenes y entrenar un nuevo modelo con dichas imágenes, pero para esto habría que tener un buen modelo de localización, ya que errar en la localización hará que se clasfiquen ejemplos incorrectamente.
 
