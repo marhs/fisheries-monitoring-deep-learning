@@ -225,12 +225,6 @@ red ha clasificado correctamente el 66 \% de las imágenes, un número muy
 aceptable teniendo en cuenta que solo se ha tocado la capa final de un modelo
 ajeno.
 
-Al subir la predicción del conjunto de test a \textit{kaggle} se obtiene una
-puntuación de \textbf{2.632} en la clasificación pública, mediante la pérdida
-logarítmica. Hay que recordar que esta puntuación se calcula usando un
-subconjunto del conjunto de test, así que la puntuación de este modelo puede
-cambiar en la segunda fase.
-
 Al subir a \textit{Kaggle} las predicciones del modelo sobre el conjunto de
 prueba de la primera fase de la competición se obtuvo una puntuación de pérdida
 logarítimica de 2.632. Aunque el error ha aumentado sensiblemente esto es
@@ -829,7 +823,7 @@ tabla pública de \textit{Kaggle}, empeorando el anterior envío.
 
 \subsection{Fuga de datos}
 
-En las competiciones de modelos predictivos como \textit{Kaggle} a veces se usan datos no diferentes al conjunto de datos para clasificar. En este caso hemos usado los tamaños de las imágenes, pero podría usarse también información oculta en los metadatos de la imágen, como coordenadas GPS, hora de toma de la fotografía o marca de la cámara. Esto se conoce como \textbf{fuga de datos}.
+En las competiciones de modelos predictivos como \textit{Kaggle} a veces se usan datos diferentes al conjunto de datos para clasificar. En este caso hemos usado los tamaños de las imágenes, pero podría usarse también información oculta en los metadatos de la imágen, como coordenadas GPS, hora de toma de la fotografía o marca de la cámara. Esto se conoce como \textbf{fuga de datos}.
 
 No todos estos datos son publicados de una manera voluntaria por comunidades de campeonatos, pero son útiles para conseguir una pequeña mejora en el modelo, siempre que el modelo puede aprovecharse de estos datos.
 
