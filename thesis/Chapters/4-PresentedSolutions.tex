@@ -13,17 +13,18 @@ la puntuación en \textit{Kaggle}, que permite enviar hasta cinco predicciones a
 día. Esto es un obstáculo para hacer pequeñas pruebas e iterar rápido sobre los
 resultados. Por otra parte, el conjunto de test de la segunda fase tiene más de
 13000 imágenes, que no son rápidas de cargar en memoria ni de pasar por el
-modelo. En determinados casos la evaluación del segundo conjunto de test ha
-tardado más de 6 horas.
+modelo. En determinados casos la generación del archivo de clasificación del
+segundo conjunto de test ha tardado más de 6 horas.
 
-La solución a este problema se ha resuelto usando un subconjunto del conjunto
-de entrenamiento dedicado solo a la evaluación de modelos. Por otra parte, para
-el entrenamiento es necesario usar un subconjunto de validación, por lo tanto
-es necesario dividir el conjunto de entrenamiento original en tres
-subconjuntos: entrenamiento, validación y test. La partición se ha realizado
-dejando un \textbf{60 \%} de los datos al conjunto de entrenamiento, un
-\textbf{20 \%} al conjunto de validación y un \textbf{20 \%} al conjunto de
-test.
+La solución a este problema se ha resuelto tratando una parte del conjunto de
+entrenamiento como si fuera el conjunto de test de \textit{Kaggle}, dedicado
+solo a la evaluación de modelos. Por otra parte, para el entrenamiento es
+necesario usar un subconjunto de validación para elegir el mejor modelo, por lo
+tanto es necesario dividir el conjunto de entrenamiento original en tres
+subconjuntos: \textbf{entrenamiento, validación y test}. La partición se ha
+realizado dejando un \textbf{60 \%} de los datos al conjunto de entrenamiento,
+un \textbf{20 \%} al conjunto de validación y un \textbf{20 \%} al conjunto de
+test. 
 
 Otra posibilidad sería emplear la metodología de validación cruzada, que
 consiste en dividir el conjunto de entrenamiento en $n$ partes, usando $n-1$ de
@@ -39,7 +40,7 @@ costosos y puede aumentar mucho el tiempo de entrenamiento.
 La partición de un conjunto de datos es una operación delicada. Ya vimos que
 uno de los problemas de nuestro conjunto de datos de entrenamiento era que la
 cantidad de imágenes para cada clase era muy variada, teniendo algunas de ellas
-un número muy bajo de ejemplos. Si seleccionamos aleatoriamente el 40 \% de las
+un número muy bajo de ejemplos. Si seleccionamos aleatoriamente el 20 \% de las
 imágenes, es posible que no se elijan ejemplos de una o varias de las
 categorías, con lo que los modelos construidos no las tendrían en cuenta.
 
@@ -55,7 +56,12 @@ Para una búsqueda más eficiente de parámetros y configuraciones los modelos s
 
 \subsection{Software}
 
-Todos los modelos de redes convolucionales construidas en este proyecto han sido entrenados usando \textit{Keras} (véase apéndice \ref{ap:keras}) sobre cuadernos de \textit{Jupyter} \parencite{jupyter}. La estructura de desarrollo y algunas utilidades están descritas en \parencite{fastai} y \parencite{felixyu}.
+Todos los modelos de redes convolucionales construidas en este proyecto han
+sido entrenados usando \textit{Keras} (véase apéndice \ref{ap:keras}) sobre
+cuadernos de \textit{Jupyter} \parencite{jupyter}. Ideas sobre la estructura de
+desarrollo y algunas utilidades están descritas en \parencite{fastai} y
+\parencite{felixyu}.
+
 
 
 \section{Arquitectura de los modelos}
@@ -227,9 +233,9 @@ ajeno.
 
 Al subir a \textit{Kaggle} las predicciones del modelo sobre el conjunto de
 prueba de la primera fase de la competición se obtuvo una puntuación de pérdida
-logarítimica de 2.632. Aunque el error ha aumentado sensiblemente esto es
+logarítimica de \textbf{2.632}. Aunque el error ha aumentado sensiblemente esto es
 perfectamente normal, ya que las imágenes proporcionadas al modelo son
-completamente nuevas.
+completamente nuevas. Lo interesante será comparar esta puntuación con las de otros modelos sobre el mismo conjunto de test.
 
 \section{Modelo completamente conectado}
 \label{sec:model_connected}
@@ -242,9 +248,7 @@ veces más pequeñas que las originales.
 
 La estructura, por lo tanto, quedaría de la misma manera pero usando dos capas
 densas de 512 neuronas cada una y una capa densa final de 8 (figura
-\ref{standard_arch}). Para no tener que estar modificando cada vez el modelo
-original cada vez que haga falta es mucho más sencillo crear un modelo nuevo
-con $Keras$ y añadir todas las capas necesarias.
+\ref{standard_arch}). En vez de separar la parte convolucional de la densa en el modelo y modificar la densa cada vez que haya que probar una idea diferente, es más sencillo crear una red neuronal nueva con $Keras$, y añadir todas las capas necesarias.
 
 \begin{figure}
   \caption{Arquitectura del modelo completamente conectado}
@@ -325,7 +329,7 @@ activación de las capas densas. Esta capa convierte activaciones aleatorias a
 
 En un principio parecería que esto perjudica al modelo, pero al eliminar algunos de los pesos el modelo evita centrarse en características individuales de cada ejemplo de clasificación, obligándolo a generalizar más rápido \parencite{dropout}.
 
-Un pequeño experimento en un modelo más avanzado (VGG con \textit{batch normalization} y aumento de datos) permite ver cómo afecta el \textit{dropout} a la puntuación final. En la figura \ref{dropout} se puede observar que la mejor puntuación se alcanza eliminando el 45 \% de las activaciones, consiguiendo una mejora de un 25 \% sobre el modelo que usa todas las activaciones.
+Un pequeño experimento en un modelo más avanzado (VGG con normalización por lotes y aumento de datos) permite ver cómo afecta el \textit{dropout} a la puntuación final. En la figura \ref{dropout} se puede observar que la mejor puntuación se alcanza eliminando el 45 \% de las activaciones, consiguiendo una mejora de un 25 \% sobre el modelo que usa todas las activaciones.
 
 \begin{figure}
     \caption{Evolución de la puntuación de un modelo usando \textit{dropout}}
@@ -467,7 +471,10 @@ de \textbf{1.017}.
 
 Uno de los principales obstáculos de este problema es el reducido tamaño del conjunto de datos de entrenamiento. El tener pocos ejemplos sobre los que entrenar hace que al modelo le cueste generalizar sobre los ejemplos disponibles, produciéndose un sobreajuste.
 
-Uno de los métodos que se usan para tratar de reducir el sobreajuste del modelo es el llamado aumento de datos (\textit{data augmentation}). Consiste en generar imágenes de entrenamiento adicionales a partir de las ya disponibles, rotando la imagen original, aumentándola, cambiando ligeramente el color, etc.
+Para tratar de reducir el sobreajuste del modelo se puede usar una técnica
+llamada aumento de datos (\textit{data augmentation}). Consiste en generar
+imágenes de entrenamiento adicionales a partir de las ya disponibles, rotando
+la imagen original, aumentándola, cambiando ligeramente el color, etc.
 
 En el caso de nuestro problema esta técnica es especialmente interesante, ya
 que las cámaras de los barcos están fijas apuntando siempre a la misma zona. En
@@ -843,12 +850,12 @@ modelos. Si queremos un modelo que localice peces en las imágenes necesitaremos
 ejemplos con localizaciones conocidas para el conjunto de entrenamiento, cosa
 que el conjunto de datos no posee.
 
-Afortunadamente, un usuario ha localizado todos los peces del conjunto de
-entrenamiento en rectángulos y ha publicado un conjunto de datos con las
-coordenadas de los rectángulos que los contienen. Las reglas de la competición
-en \textit{Kaggle} indican que es posible usar conjuntos de datos no oficiales
-generados por otras fuentes siempre que estos se hagan públicos y estén
-disponibles para todos los participantes.
+Afortunadamente, un participante de la competición ha localizado todos los
+peces del conjunto de entrenamiento en rectángulos y ha publicado un conjunto
+de datos con las coordenadas de los rectángulos que los contienen. Las reglas
+de la competición en \textit{Kaggle} indican que es posible usar conjuntos de
+datos no oficiales generados por otras fuentes siempre que estos se hagan
+públicos y estén disponibles para todos los participantes.
 
 Usando esta información se va a hacer un modelo que para cada imagen genere una
 salida múltiple: la clasificación en una de las ocho categorías y las
@@ -1088,7 +1095,7 @@ Se han presentado dos modelos diferentes usando esta técnica. Ambos modelos
 están compuestos de tres modelos anteriores:
 
 \begin{itemize}
-    \item{Modelo con clasificador denso, dropout, normalización por lotes y
+    \item{Modelo con clasificador denso, \textit{dropout}, normalización por lotes y
         aumento de datos.}
     \item{Modelo completo convolucional}
     \item{Modelo con salida múltiple}

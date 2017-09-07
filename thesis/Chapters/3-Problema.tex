@@ -50,7 +50,7 @@ En caso de que no aparezca ningún pez en la imagen, esta tendrá la categoría 
 
 En resumen, el conjunto de posibles categorías es:
 \[
-  categories =
+  categorias =
   \left[ALB, BET, DOL, LAG, SHARK, YFT, OTHER, NOF]
 \]
 
@@ -60,7 +60,7 @@ La competición proporciona tres ficheros con los que trabajar:
 
 \begin{enumerate}
   \item{Conjunto de datos de entrenamiento: 3777 imágenes etiquetadas con una de las ocho categorías existentes.}
-  \item{Conjunto de test y evaluación: 1000 imágenes sin etiquetar.}
+  \item{Conjunto de test y evaluación: 1000 imágenes sin etiquetar para la primera fase y 13000 imágenes sin etiquetar para la segunda fase.}
   \item{Archivo de envío de prueba: Archivo CSV que muestra la estructura que debe tener el archivo con las soluciones}
 \end{enumerate}
 
@@ -105,7 +105,7 @@ Antes de terminar la primera fase de la competición los participantes deberán 
 
 Una vez terminada la primera fase, \textit{Kaggle} publicará un nuevo conjunto de test, con el que los participantes deberán clasificar usando el modelo entregado al final de la fase anterior.
 
-En esta segunda fase, que dura solo cinco días, el procedimiento es el mismo. Se publicarán puntuaciones usando un subconjunto del segundo conjunto de test y al terminar se publicará la puntuación usando el resto del conjunto. Esta última puntuación será la puntuación final de la competición. Si alguno de los participantes ha hecho un envío en la primera fase pero no ha hecho ninguno en la segunda, quedará eliminado de la competición.
+En esta segunda fase, que dura solo cinco días, el procedimiento es el mismo. Se publicarán puntuaciones usando un subconjunto del segundo conjunto de test y al terminar se publicará la puntuación usando el resto del conjunto. Esta última puntuación será la puntuación final de la competición. Si alguno de los participantes ha hecho un envío en la primera fase pero no ha hecho ninguno en la segunda, o modifica su modelo durante la segunda fase, quedará eliminado de la competición.
 
 \subsection{Conjunto de entrenamiento}
 \label{dataset}
@@ -152,11 +152,12 @@ variaciones del mismo pez con el mismo fondo.}
     Distinguir entre dos familias de atunes en una imagen oscura y con el atún
 parcialmente oculto puede llegar a ser imposible para un humano.}
 
-\item{Algunas imágenes están mal etiquetadas. Si el modelo predice la clase
-        incorrecta de la imagen (según su etiqueta) con mucha confianza, le
-        asignará poca probabilidad a la clase correcta. Una probabilidad
-        cercana a cero hará que la pérdida logarítmica aumente mucho.
-}
+\item{Algunas imágenes están mal etiquetadas, o muestran varios peces
+        diferentes en la misma foto pero solo una etiqueta. Si el modelo
+        predice la clase incorrecta de la imagen (según su etiqueta) con mucha
+        confianza, le asignará poca probabilidad a la clase correcta. Una
+        probabilidad cercana a cero hará que la pérdida logarítmica aumente
+    mucho.  }
 
 \subsection{Conjuntos de test}
 

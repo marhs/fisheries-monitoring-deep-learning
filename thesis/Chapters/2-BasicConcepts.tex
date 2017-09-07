@@ -201,7 +201,7 @@ La manera habitual de modelizar la salida de una neurona en las RNAs es a
 través de $f(x) = tanh(x)$ o $f(x) = (1 + e^{-x})^{-1}$ (función sigmoide). A
 la hora de entrenar la red con descenso del gradiente, estas funciones son
 mucho más lentas que otra función que también evita la linealidad: $f(x) =
-max(0, x)$, llamada ReLU (\textit{Rectifier Linear}). Las redes neuronales
+max(0, x)$, llamada ReLU (\textit{Rectifier Linear Unit}). Las redes neuronales
 convolucionales entrenan varias veces más rápido usando ReLU  que las
 equivalentes usando la función $tanh$ (ver figura \ref{relu-vs-tanh}).
 
@@ -246,6 +246,10 @@ Esta capa suele usarse al final de la arquitectura, cuando se han producido vari
   \includegraphics{conv-arch}
 \end{figure}
 
-Un esquema simplificado de un ejemplo de uso de las capas mencionadas se puede encontrar en la figura \ref{conv-arch}. La idea es, mediante capas CONV + RELU + POOL, transformar la imagen en una multitud de representaciones de conceptos cada vez más abstractos. Una vez se alcancen dichos conceptos, usar capas FC para modelizar la salida de la red.
+Un esquema simplificado de un ejemplo de uso de las capas mencionadas se puede
+encontrar en la figura \ref{conv-arch}. La idea consiste en transformar la
+imagen en una multitud de representaciones de conceptos cada vez más abstractos
+mediante capas CONV + RELU + POOL. Una vez se alcancen dichos conceptos, usar
+capas FC para modelizar la salida de la red.
 
 Como se verá en la solución presentada para este proyecto, en el capítulo \ref{cap:soluciones}, usar esta arquitectura permite apoyarse en determinadas estrategias para mejorar la eficacia del modelo predictivo.
