@@ -1,7 +1,10 @@
 Fisheries monitoring using deep convolutional networks
 ======================================================
 
-This is the submission to [The Nature Conservancy Fisheries Monitoring](https://www.kaggle.com/c/the-nature-conservancy-fisheries-monitoring) Kaggle competition.
+This is the submission to [The Nature Conservancy Fisheries Monitoring](https://www.kaggle.com/c/the-nature-conservancy-fisheries-monitoring) Kaggle competition, using deep convolutional networks and pre-trained models.
+
+
+![Standard multi output architecture](https://raw.githubusercontent.com/marhs/fisheries-monitoring-deep-learning/master/thesis/Figures/portada.png)
 
 ## Abstract
 
