@@ -16,7 +16,7 @@ pesqueros con el objetivo de analizar el comportamiento de estos.
 
 Las soluciones exploran el uso de arquitecturas de aprendizaje profundo, usando
 redes neuronales convolucionales preentrenadas para otras competciones de
-reconoci- miento de imágenes mucho más generalistas junto con arquitecturas
+reconocimiento de imágenes mucho más generalistas junto con arquitecturas
 diseñadas para este problema.
 
 La solución final presentada en este trabajo consigue una medalla de bronce en
@@ -36,4 +36,4 @@ All submissions have their own notebook inside the `notebooks` directory. If you
 
 ## Biography
 
-You can read the entire biography at the end of `thesis/main.pdf` file.
+You can read the entire biography at the end of `Master-thesis.pdf` file.
